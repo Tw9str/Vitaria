@@ -188,16 +188,20 @@ export async function upsertProductAction(
     }
   }
 
+  const userId = session?.user?.id ?? null;
   const saved = id
     ? await prisma.product.update({
         where: { id },
         data: { ...data, slug: newSlug },
       })
-    : await prisma.product.create({ data: { ...data, slug: newSlug } });
+    : await prisma.product.create({
+        data: { ...data, slug: newSlug, createdById: userId },
+      });
 
   const actor = {
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name,
+    actorId: session?.user?.id ?? null,
   };
   void appendLog({
     ...actor,
@@ -205,6 +209,9 @@ export async function upsertProductAction(
     entity: "product",
     entityId: saved.id,
     entityTitle: saved.title,
+    detail: id
+      ? `Updated "${saved.title}"`
+      : `Created as ${saved.published ? "published" : "draft"}`,
   });
 
   revalidatePath("/");
@@ -219,6 +226,7 @@ export async function deleteProductAction(formData: FormData) {
   const actor = {
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name,
+    actorId: session?.user?.id ?? null,
   };
 
   const id = getString(formData, "id");
@@ -237,6 +245,7 @@ export async function deleteProductAction(formData: FormData) {
     entity: "product",
     entityId: id,
     entityTitle: product?.title,
+    detail: `"${product?.title ?? id}" permanently deleted`,
     severity: "warning",
   });
 
@@ -258,6 +267,7 @@ export async function toggleProductPublishedAction(
   const actor = {
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name,
+    actorId: session?.user?.id ?? null,
   };
   if (!id) throw new Error("Missing product id.");
   const product = await prisma.product.update({
@@ -271,6 +281,9 @@ export async function toggleProductPublishedAction(
     entity: "product",
     entityId: id,
     entityTitle: product.title,
+    detail: published
+      ? `"${product.title}" published to storefront`
+      : `"${product.title}" hidden from storefront`,
   });
   revalidatePath("/");
 }
@@ -281,6 +294,7 @@ export async function quickDeleteProductAction(id: string): Promise<void> {
   const actor = {
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name,
+    actorId: session?.user?.id ?? null,
   };
   if (!id) throw new Error("Missing product id.");
 
@@ -296,6 +310,7 @@ export async function quickDeleteProductAction(id: string): Promise<void> {
     entity: "product",
     entityId: id,
     entityTitle: product?.title,
+    detail: `"${product?.title ?? id}" permanently deleted`,
     severity: "warning",
   });
 

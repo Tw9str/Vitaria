@@ -20,9 +20,16 @@ model User {
   image         String?
 
   role          Role      @default(editor)
+  blocked       Boolean   @default(false)
 
   accounts      Account[]
   sessions      Session[]
+
+  // Back-relations
+  createdProducts  Product[]     @relation("ProductCreatedBy")
+  createdNotes     Note[]        @relation("NoteAuthor")
+  updatedLeadNotes Lead[]        @relation("LeadNotesUpdatedBy")
+  activityLogs     ActivityLog[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -86,6 +93,10 @@ model Product {
   sections  ProductSection[]
   specs     ProductSpec[]
   published Boolean  @default(false)
+
+  createdById String? @db.ObjectId
+  createdBy   User?   @relation("ProductCreatedBy", fields: [createdById], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -104,6 +115,10 @@ model Lead {
   referrer  String?
   status    String   @default("new")
   notes     String?
+
+  notesUpdatedById String? @db.ObjectId
+  notesUpdatedBy   User?   @relation("LeadNotesUpdatedBy", fields: [notesUpdatedById], references: [id])
+
   createdAt DateTime @default(now())
 }
 
@@ -111,6 +126,10 @@ model Note {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
   pinned    Boolean  @default(false)
+
+  authorId    String? @db.ObjectId
+  author      User?   @relation("NoteAuthor", fields: [authorId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -124,6 +143,8 @@ model ActivityLog {
   entityTitle String?
   actorEmail  String
   actorName   String?
+  actorId     String?  @db.ObjectId
+  actor       User?    @relation(fields: [actorId], references: [id])
   severity    String   @default("info")
   detail      String?
   createdAt   DateTime @default(now())

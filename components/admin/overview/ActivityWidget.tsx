@@ -15,6 +15,8 @@ const ACTION_LABELS: Record<string, string> = {
   USER_DELETED: "Deleted user",
   USER_RENAMED: "Renamed user",
   USER_ROLE_CHANGED: "Changed user role",
+  USER_BLOCKED: "Blocked user",
+  USER_UNBLOCKED: "Unblocked user",
   NOTE_CREATED: "Created note",
   NOTE_UPDATED: "Updated note",
   NOTE_DELETED: "Deleted note",
@@ -129,9 +131,9 @@ function formatRelative(date: Date): string {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-type Props = { logs: LogEntry[] };
+type Props = { logs: LogEntry[]; imageUrlMap?: Record<string, string> };
 
-export default function ActivityWidget({ logs }: Props) {
+export default function ActivityWidget({ logs, imageUrlMap = {} }: Props) {
   return (
     <div className="rounded-[18px] border border-border bg-surface">
       {/* Header */}
@@ -151,31 +153,46 @@ export default function ActivityWidget({ logs }: Props) {
         </p>
       ) : (
         <div className="divide-y divide-border">
-          {logs.map((log) => (
-            <div key={log.id} className="flex items-center gap-3 px-5 py-3">
-              {/* Entity icon */}
-              <span className="shrink-0 text-subtle">
-                {ENTITY_ICONS[log.entity] ?? ENTITY_ICONS.product}
-              </span>
+          {logs.map((log) => {
+            const actorLabel = log.actorName ?? log.actorEmail;
+            const actorInitial = actorLabel.charAt(0).toUpperCase();
+            const avatarUrl = log.actor?.image
+              ? imageUrlMap[log.actor.image]
+              : null;
+            return (
+              <div key={log.id} className="flex items-center gap-3 px-5 py-3">
+                {/* Actor avatar */}
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="h-7 w-7 rounded-full object-cover shrink-0"
+                  />
+                ) : (
+                  <span className="h-7 w-7 rounded-full bg-brand-ink text-white text-[10px] font-semibold flex items-center justify-center shrink-0">
+                    {actorInitial}
+                  </span>
+                )}
 
-              {/* Action + entity title */}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-text">
-                  {ACTION_LABELS[log.action] ?? log.action}
-                </p>
-                <p className="truncate text-xs text-muted">
-                  {log.entityTitle
-                    ? `${log.entityTitle} · ${log.actorName ?? log.actorEmail}`
-                    : (log.actorName ?? log.actorEmail)}
-                </p>
+                {/* Action + entity title */}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-text">
+                    {ACTION_LABELS[log.action] ?? log.action}
+                  </p>
+                  <p className="truncate text-xs text-muted">
+                    {log.entityTitle
+                      ? `${log.entityTitle} · ${actorLabel}`
+                      : actorLabel}
+                  </p>
+                </div>
+
+                <SeverityBadge severity={log.severity} />
+                <span className="shrink-0 text-xs text-subtle">
+                  {formatRelative(log.createdAt)}
+                </span>
               </div>
-
-              <SeverityBadge severity={log.severity} />
-              <span className="shrink-0 text-xs text-subtle">
-                {formatRelative(log.createdAt)}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

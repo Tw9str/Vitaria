@@ -20,6 +20,8 @@ const ACTION_LABELS: Record<string, string> = {
   USER_DELETED: "Deleted user",
   USER_RENAMED: "Renamed user",
   USER_ROLE_CHANGED: "Changed user role",
+  USER_BLOCKED: "Blocked user",
+  USER_UNBLOCKED: "Unblocked user",
   NOTE_CREATED: "Created note",
   NOTE_UPDATED: "Updated note",
   NOTE_DELETED: "Deleted note",
@@ -54,16 +56,22 @@ function formatDate(d: Date) {
 type Props = {
   initialLogs: LogEntry[];
   initialHasMore: boolean;
+  initialImageUrlMap: Record<string, string>;
   onLoadMore: (
     entity: string,
     severity: string,
     skip: number,
-  ) => Promise<{ logs: LogEntry[]; hasMore: boolean }>;
+  ) => Promise<{
+    logs: LogEntry[];
+    hasMore: boolean;
+    imageUrlMap: Record<string, string>;
+  }>;
 };
 
 export default function LogsListClient({
   initialLogs,
   initialHasMore,
+  initialImageUrlMap,
   onLoadMore,
 }: Props) {
   const [entity, setEntity] = useState<string>("all");
@@ -71,6 +79,8 @@ export default function LogsListClient({
   const [logs, setLogs] = useState<LogEntry[]>(initialLogs);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [skip, setSkip] = useState(initialLogs.length);
+  const [imageUrlMap, setImageUrlMap] =
+    useState<Record<string, string>>(initialImageUrlMap);
   const [isPending, startTransition] = useTransition();
 
   function handleEntityChange(val: string) {
@@ -78,6 +88,7 @@ export default function LogsListClient({
     startTransition(async () => {
       const result = await onLoadMore(val, severity, 0);
       setLogs(result.logs);
+      setImageUrlMap(result.imageUrlMap ?? {});
       setHasMore(result.hasMore);
       setSkip(result.logs.length);
     });
@@ -88,6 +99,7 @@ export default function LogsListClient({
     startTransition(async () => {
       const result = await onLoadMore(entity, val, 0);
       setLogs(result.logs);
+      setImageUrlMap(result.imageUrlMap ?? {});
       setHasMore(result.hasMore);
       setSkip(result.logs.length);
     });
@@ -97,6 +109,7 @@ export default function LogsListClient({
     startTransition(async () => {
       const result = await onLoadMore(entity, severity, skip);
       setLogs((prev) => [...prev, ...result.logs]);
+      setImageUrlMap((prev) => ({ ...prev, ...(result.imageUrlMap ?? {}) }));
       setHasMore(result.hasMore);
       setSkip((prev) => prev + result.logs.length);
     });
@@ -159,10 +172,10 @@ export default function LogsListClient({
                       Action
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-muted">
-                      Entity
+                      Actor
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-muted">
-                      Actor
+                      Entity
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-muted">
                       Detail
@@ -190,6 +203,34 @@ export default function LogsListClient({
                       <td className="px-4 py-3 font-medium text-text">
                         {ACTION_LABELS[log.action] ?? log.action}
                       </td>
+                      {/* Actor */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          {log.actor?.image && imageUrlMap[log.actor.image] ? (
+                            <img
+                              src={imageUrlMap[log.actor.image]}
+                              alt=""
+                              className="h-8 w-8 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <span className="h-8 w-8 rounded-full bg-brand-ink text-white text-[11px] font-semibold flex items-center justify-center shrink-0">
+                              {(log.actorName ?? log.actorEmail)
+                                .charAt(0)
+                                .toUpperCase()}
+                            </span>
+                          )}
+                          <div className="text-xs min-w-0">
+                            {log.actorName && (
+                              <p className="font-medium text-text truncate">
+                                {log.actorName}
+                              </p>
+                            )}
+                            <p className="text-muted truncate">
+                              {log.actorEmail}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
                       {/* Entity title + type */}
                       <td className="px-4 py-3">
                         <span className="capitalize text-muted text-xs">
@@ -201,23 +242,15 @@ export default function LogsListClient({
                           </p>
                         )}
                       </td>
-                      {/* Actor */}
-                      <td className="px-4 py-3 text-xs text-muted">
-                        {log.actorName ? (
-                          <>
-                            <span className="text-text font-medium">
-                              {log.actorName}
-                            </span>
-                            <br />
-                            <span>{log.actorEmail}</span>
-                          </>
-                        ) : (
-                          log.actorEmail
-                        )}
-                      </td>
                       {/* Detail */}
-                      <td className="px-4 py-3 text-xs text-muted max-w-50 truncate">
-                        {log.detail ?? "—"}
+                      <td className="px-4 py-3 text-xs text-muted max-w-52">
+                        {log.detail ? (
+                          <span className="block leading-relaxed">
+                            {log.detail}
+                          </span>
+                        ) : (
+                          <span className="text-subtle/40">—</span>
+                        )}
                       </td>
                       {/* Date */}
                       <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">

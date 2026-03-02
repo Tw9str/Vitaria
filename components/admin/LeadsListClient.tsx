@@ -305,6 +305,26 @@ export default function LeadsListClient({
 
               {/* Internal note */}
               <LeadNoteInput leadId={l.id} initialNotes={l.notes ?? null} />
+              {l.notesUpdatedBy && (
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  {l.notesUpdatedBy.image ? (
+                    <img
+                      src={l.notesUpdatedBy.image}
+                      alt=""
+                      className="h-4 w-4 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <span className="h-4 w-4 rounded-full bg-brand-ink text-white text-[9px] font-semibold flex items-center justify-center shrink-0">
+                      {(l.notesUpdatedBy.name ?? l.notesUpdatedBy.email ?? "?")
+                        .charAt(0)
+                        .toUpperCase()}
+                    </span>
+                  )}
+                  <span className="text-[11px] text-subtle">
+                    Note by {l.notesUpdatedBy.name ?? l.notesUpdatedBy.email}
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>

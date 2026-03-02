@@ -6,6 +6,7 @@ export type UserRow = {
   email: string | null;
   image: string | null;
   role: "admin" | "editor";
+  blocked: boolean;
   createdAt: Date;
 };
 
@@ -17,6 +18,7 @@ export async function getAllUsers(): Promise<UserRow[]> {
       email: true,
       image: true,
       role: true,
+      blocked: true,
       createdAt: true,
     },
     orderBy: { createdAt: "asc" },

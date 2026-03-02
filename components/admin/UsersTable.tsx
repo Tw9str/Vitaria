@@ -1,17 +1,12 @@
 "use client";
 
-import {
-  useActionState,
-  useEffect,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import {
   createUserAction,
   deleteUserAction,
   updateUserRoleAction,
   updateUserNameAction,
+  toggleBlockUserAction,
   type CreateUserState,
 } from "@/app/actions/user";
 import type { UserRow } from "@/lib/db/users";
@@ -65,6 +60,54 @@ function RoleSelect({
 }
 
 // ---------------------------------------------------------------------------
+// Block button
+// ---------------------------------------------------------------------------
+
+function BlockButton({
+  userId,
+  blocked,
+  isSelf,
+}: {
+  userId: string;
+  blocked: boolean;
+  isSelf: boolean;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const toast = useToast();
+
+  if (isSelf) return null;
+
+  function handleToggle() {
+    startTransition(async () => {
+      const result = await toggleBlockUserAction(userId, !blocked);
+      if (result.error) toast.error(result.error);
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleToggle}
+      disabled={isPending}
+      title={blocked ? "Unblock user" : "Block user"}
+      className={`cursor-pointer rounded-lg px-2.5 py-1 text-xs font-medium transition disabled:opacity-50 ${
+        blocked
+          ? "text-amber-600 hover:bg-amber-500/10"
+          : "text-muted hover:bg-black/10"
+      }`}
+    >
+      {isPending ? (
+        <Spinner className="h-3 w-3" />
+      ) : blocked ? (
+        "Unblock"
+      ) : (
+        "Block"
+      )}
+    </button>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Delete button
 // ---------------------------------------------------------------------------
 
@@ -90,7 +133,7 @@ function DeleteButton({ userId, isSelf }: { userId: string; isSelf: boolean }) {
 
   if (confirm) {
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="inline-flex items-center gap-1.5 whitespace-nowrap">
         <button
           type="button"
           onClick={handleDelete}
@@ -148,12 +191,14 @@ function AddUserForm() {
   );
   const [role, setRole] = useState("editor");
   const toast = useToast();
-  const prevState = useRef<CreateUserState>(null);
+
   useEffect(() => {
-    if (state === prevState.current) return;
-    prevState.current = state;
-    if (state?.success) toast.success("User added successfully.");
-    else if (state?.formError) toast.error(state.formError);
+    if (state?.success) {
+      toast.success("User added successfully.");
+      setRole("editor");
+    } else if (state?.formError) {
+      toast.error(state.formError);
+    }
   }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -163,7 +208,32 @@ function AddUserForm() {
     >
       <h2 className="mb-4 text-sm font-semibold">Add user</h2>
 
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-start gap-3">
+        {/* Name */}
+        <div className="flex-1 min-w-40">
+          <label
+            htmlFor="new-user-name"
+            className="mb-1 block text-xs font-medium text-muted"
+          >
+            Name
+          </label>
+          <input
+            id="new-user-name"
+            name="name"
+            type="text"
+            autoComplete="off"
+            placeholder="John Doe"
+            key={state?.success ? "name-reset" : "name"}
+            defaultValue={state?.values?.name ?? ""}
+            className={`w-full rounded-xl border bg-bg px-3 py-2 text-sm text-text outline-none placeholder:text-subtle transition focus-visible:ring-2 focus-visible:ring-gold/30 ${state?.fieldErrors?.name ? "border-red-500" : "border-border"}`}
+          />
+          {state?.fieldErrors?.name && (
+            <p className="mt-1 text-xs text-red-500">
+              {state.fieldErrors.name[0]}
+            </p>
+          )}
+        </div>
+
         {/* Email */}
         <div className="flex-1 min-w-48">
           <label
@@ -178,8 +248,15 @@ function AddUserForm() {
             type="email"
             autoComplete="off"
             placeholder="user@example.com"
-            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text outline-none placeholder:text-subtle transition focus-visible:ring-2 focus-visible:ring-gold/30"
+            key={state?.success ? "email-reset" : "email"}
+            defaultValue={state?.values?.email ?? ""}
+            className={`w-full rounded-xl border bg-bg px-3 py-2 text-sm text-text outline-none placeholder:text-subtle transition focus-visible:ring-2 focus-visible:ring-gold/30 ${state?.fieldErrors?.email ? "border-red-500" : "border-border"}`}
           />
+          {state?.fieldErrors?.email && (
+            <p className="mt-1 text-xs text-red-500">
+              {state.fieldErrors.email[0]}
+            </p>
+          )}
         </div>
 
         {/* Role */}
@@ -200,17 +277,12 @@ function AddUserForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="cursor-pointer rounded-xl bg-brand-ink px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-1.5"
+          className="cursor-pointer rounded-xl bg-brand-ink px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 inline-flex items-center gap-1.5 mt-5"
         >
           {isPending && <Spinner className="h-3.5 w-3.5" />}
           {isPending ? "Adding…" : "Add user"}
         </button>
       </div>
-      {state?.fieldErrors?.email && (
-        <p className="mt-2 text-xs text-red-500">
-          {state.fieldErrors.email[0]}
-        </p>
-      )}
     </form>
   );
 }
@@ -427,8 +499,15 @@ export default function UsersTable({
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-5 py-3.5 text-right">
-                      <DeleteButton userId={user.id} isSelf={isSelf} />
+                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center justify-end gap-1">
+                        <BlockButton
+                          userId={user.id}
+                          blocked={user.blocked}
+                          isSelf={isSelf}
+                        />
+                        <DeleteButton userId={user.id} isSelf={isSelf} />
+                      </div>
                     </td>
                   </tr>
                 );

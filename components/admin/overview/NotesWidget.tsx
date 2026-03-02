@@ -144,9 +144,9 @@ function NoteModal({
 
 // ─── Widget ─────────────────────────────────────────────────────────────────
 
-type Props = { notes: NoteItem[] };
+type Props = { notes: NoteItem[]; imageUrlMap?: Record<string, string> };
 
-export default function NotesWidget({ notes }: Props) {
+export default function NotesWidget({ notes, imageUrlMap = {} }: Props) {
   const [modal, setModal] = useState<ModalMode | null>(null);
   const [pendingPinId, setPendingPinId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -174,7 +174,7 @@ export default function NotesWidget({ notes }: Props) {
 
   return (
     <>
-      <div className="rounded-[18px] border border-border bg-surface">
+      <div className="rounded-[18px] border border-border bg-surface overflow-hidden">
         <div className="flex items-center justify-between border-b border-border px-4 py-3.5">
           <h2 className="text-sm font-semibold">Notes</h2>
           <button
@@ -243,14 +243,37 @@ export default function NotesWidget({ notes }: Props) {
                   <p className="line-clamp-2 text-sm text-text">
                     {note.content}
                   </p>
-                  <p className="mt-0.5 text-xs text-subtle">
-                    {new Date(note.updatedAt).toLocaleString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5">
+                    <p className="text-xs text-subtle shrink-0">
+                      {new Date(note.updatedAt).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    {note.author && (
+                      <>
+                        <span className="text-subtle text-xs">&middot;</span>
+                        {note.author.image && imageUrlMap[note.author.image] ? (
+                          <img
+                            src={imageUrlMap[note.author.image]}
+                            alt=""
+                            className="h-6 w-6 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <span className="h-6 w-6 rounded-full bg-brand-ink text-white text-[9px] font-semibold flex items-center justify-center shrink-0">
+                            {(note.author.name ?? note.author.email ?? "?")
+                              .charAt(0)
+                              .toUpperCase()}
+                          </span>
+                        )}
+                        <span className="text-xs text-subtle truncate">
+                          {note.author.name ?? note.author.email}
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </button>
 
                 {/* Delete shortcut */}

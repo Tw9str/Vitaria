@@ -81,6 +81,11 @@ export async function getAllProducts() {
   try {
     return await prisma.product.findMany({
       orderBy: { updatedAt: "desc" },
+      include: {
+        createdBy: {
+          select: { id: true, name: true, email: true, image: true },
+        },
+      },
     });
   } catch (cause) {
     throw new Error("Failed to load product list.", { cause });
@@ -90,7 +95,14 @@ export async function getAllProducts() {
 /** Single product by id for the admin editor. */
 export async function getProductById(id: string) {
   try {
-    return await prisma.product.findUnique({ where: { id } });
+    return await prisma.product.findUnique({
+      where: { id },
+      include: {
+        createdBy: {
+          select: { id: true, name: true, email: true, image: true },
+        },
+      },
+    });
   } catch (cause) {
     throw new Error(`Failed to load product with id "${id}".`, { cause });
   }

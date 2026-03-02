@@ -6,6 +6,11 @@ export async function getRecentLeads(take = 50) {
     return await prisma.lead.findMany({
       orderBy: { createdAt: "desc" },
       take,
+      include: {
+        notesUpdatedBy: {
+          select: { id: true, name: true, email: true, image: true },
+        },
+      },
     });
   } catch (cause) {
     throw new Error("Failed to load leads.", { cause });

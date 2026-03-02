@@ -12,8 +12,15 @@ export default async function AdminProducts() {
 
   try {
     products = await getAllProducts();
+
+    // Collect all R2 keys: product thumbnails + creator avatars
     const heroKeys = products.map((p) => p.image).filter(Boolean) as string[];
-    const signed = await presignViewUrls(heroKeys).catch(() => []);
+    const avatarKeys = products
+      .map((p) => p.createdBy?.image)
+      .filter(Boolean) as string[];
+    const allKeys = [...new Set([...heroKeys, ...avatarKeys])];
+
+    const signed = await presignViewUrls(allKeys).catch(() => []);
     urlMap = Object.fromEntries(signed.map((s) => [s.key, s.viewUrl]));
   } catch (err) {
     console.error("[AdminProducts] failed to load:", err);
@@ -106,7 +113,31 @@ export default async function AdminProducts() {
                         <p className="font-semibold truncate text-sm">
                           {p.title}
                         </p>
-                        <p className="text-xs text-muted truncate">/{p.slug}</p>
+                        {/* Created by */}
+                        {p.createdBy ? (
+                          <div className="mt-0.5 flex items-center gap-1">
+                            {urlMap[p.createdBy.image ?? ""] ? (
+                              <img
+                                src={urlMap[p.createdBy.image!]}
+                                alt=""
+                                className="h-5 w-5 rounded-full object-cover shrink-0"
+                              />
+                            ) : (
+                              <span className="h-5 w-5 rounded-full bg-brand-ink text-white text-[8px] font-semibold flex items-center justify-center shrink-0">
+                                {(p.createdBy.name ?? p.createdBy.email ?? "?")
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                            <span className="text-[11px] text-muted truncate">
+                              {p.createdBy.name ?? p.createdBy.email}
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-muted truncate mt-0.5">
+                            No author
+                          </p>
+                        )}
                       </div>
                       <EditButton href={`/admin/products/${p.id}`} />
                     </div>

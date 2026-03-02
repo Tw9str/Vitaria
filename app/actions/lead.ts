@@ -18,6 +18,7 @@ export async function updateLeadStatusAction(
   const actor = {
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name,
+    actorId: session?.user?.id ?? null,
   };
 
   if (!LEAD_STATUSES.includes(status)) {
@@ -56,6 +57,7 @@ export async function updateLeadNotesAction(
   const actor = {
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name,
+    actorId: session?.user?.id ?? null,
   };
 
   const lead = await prisma.lead.findUnique({
@@ -66,7 +68,10 @@ export async function updateLeadNotesAction(
 
   await prisma.lead.update({
     where: { id: leadId },
-    data: { notes: notes.trim() || null },
+    data: {
+      notes: notes.trim() || null,
+      notesUpdatedById: session?.user?.id ?? null,
+    },
   });
   await appendLog({
     ...actor,
@@ -74,6 +79,9 @@ export async function updateLeadNotesAction(
     entity: "lead",
     entityId: leadId,
     entityTitle: lead ? `${lead.name} — ${lead.company}` : leadId,
+    detail: notes.trim()
+      ? notes.trim().slice(0, 100) + (notes.trim().length > 100 ? "…" : "")
+      : "Notes cleared",
   });
 
   revalidatePath("/admin/leads");
@@ -90,6 +98,13 @@ export type LeadRow = {
   message: string | null;
   status: string;
   notes: string | null;
+  notesUpdatedById: string | null;
+  notesUpdatedBy: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    image: string | null;
+  } | null;
   createdAt: Date;
 };
 
@@ -129,6 +144,11 @@ export async function fetchLeadsAction(params: {
     orderBy: { createdAt: "desc" },
     skip,
     take: safePage + 1,
+    include: {
+      notesUpdatedBy: {
+        select: { id: true, name: true, email: true, image: true },
+      },
+    },
   });
 
   const hasMore = rows.length > safePage;

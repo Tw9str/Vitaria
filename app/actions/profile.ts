@@ -62,6 +62,7 @@ export async function updateProfileAction(
   void appendLog({
     actorEmail: session.user.email,
     actorName: parsed.data.name,
+    actorId: session.user.id ?? null,
     action: "PROFILE_UPDATED",
     entity: "profile",
     entityTitle: parsed.data.name,

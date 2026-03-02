@@ -8,14 +8,12 @@ import type { Role } from "@prisma/client";
 import { config } from "./config";
 
 // ---------------------------------------------------------------------------
-// Module augmentation — adds `role` to the session/JWT types
+// Module augmentation — adds `role` and `id` to the session user type
 // ---------------------------------------------------------------------------
 declare module "next-auth" {
   interface Session extends DefaultSession {
     role: Role;
-  }
-  interface JWT {
-    role: Role;
+    user: { id: string } & DefaultSession["user"];
   }
 }
 
@@ -23,7 +21,7 @@ declare module "next-auth" {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: "database" },
 
   providers: [
     Resend({
@@ -93,20 +91,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return !!existing;
     },
 
-    async jwt({ token, user }) {
-      // Attach role on first sign-in; subsequent requests read from the token.
-      if (user?.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email.toLowerCase() },
-          select: { role: true },
-        });
-        token.role = (dbUser?.role ?? "editor") as Role;
-      }
-      return token;
-    },
+    async session({ session, user }) {
+      // With database sessions NextAuth reads the user row on every request
+      // so role / name / image are always live — no re-login needed after
+      // profile or role changes.
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { role: true, blocked: true },
+      });
 
-    async session({ session, token }) {
-      session.role = (token.role ?? "editor") as Role;
+      // Blocked users: delete all their DB sessions immediately so every
+      // subsequent request is also rejected without reaching this callback.
+      if (dbUser?.blocked) {
+        await prisma.session.deleteMany({ where: { userId: user.id } });
+        // Return a session with no valid role so requireAuth rejects this request.
+        session.role = "editor" as Role;
+        session.user.id = "";
+        return session;
+      }
+
+      session.role = dbUser?.role ?? "editor";
+      session.user.id = user.id;
       return session;
     },
   },

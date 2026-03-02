@@ -1,5 +1,12 @@
 import { prisma } from "@/lib/prismaClient";
 
+export type UserMini = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
+};
+
 export type LogEntry = {
   id: string;
   action: string;
@@ -8,16 +15,22 @@ export type LogEntry = {
   entityTitle: string | null;
   actorEmail: string;
   actorName: string | null;
+  actorId: string | null;
+  actor: UserMini | null;
   severity: string;
   detail: string | null;
   createdAt: Date;
 };
+
+const USER_SELECT = { id: true, name: true, email: true, image: true } as const;
+const LOG_INCLUDE = { actor: { select: USER_SELECT } } as const;
 
 /** Latest N logs for the dashboard activity widget. */
 export async function getRecentLogs(limit = 10): Promise<LogEntry[]> {
   return prisma.activityLog.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
+    include: LOG_INCLUDE,
   }) as Promise<LogEntry[]>;
 }
 
@@ -48,6 +61,7 @@ export async function getLogs(filter: LogsFilter = {}): Promise<LogsResult> {
     orderBy: { createdAt: "desc" },
     skip,
     take: take + 1,
+    include: LOG_INCLUDE,
   });
 
   const hasMore = rows.length > take;

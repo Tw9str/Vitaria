@@ -3,6 +3,7 @@ import { getOverviewData } from "@/lib/db/overview";
 import type { OverviewData } from "@/lib/db/overview";
 import { getNotes, type NoteItem } from "@/lib/db/notes";
 import { getRecentLogs, type LogEntry } from "@/lib/db/logs";
+import { presignViewUrls } from "@/lib/storage";
 import StatCards from "@/components/admin/overview/StatCards";
 import RecentLeads from "@/components/admin/overview/RecentLeads";
 import LeadsSparkline from "@/components/admin/overview/LeadsSparkline";
@@ -17,12 +18,36 @@ export default async function AdminOverview() {
   let data: OverviewData | null = null;
   let notes: NoteItem[] = [];
   let recentLogs: LogEntry[] = [];
+  let noteImageUrlMap: Record<string, string> = {};
+  let activityImageUrlMap: Record<string, string> = {};
   try {
     [data, notes, recentLogs] = await Promise.all([
       getOverviewData(email),
       getNotes(),
       getRecentLogs(8),
     ]);
+
+    // Presign user avatar keys for note authors + activity actors
+    const noteAvatarKeys = notes
+      .map((n) => n.author?.image)
+      .filter(Boolean) as string[];
+    const activityAvatarKeys = recentLogs
+      .map((l) => l.actor?.image)
+      .filter(Boolean) as string[];
+    const allAvatarKeys = [
+      ...new Set([...noteAvatarKeys, ...activityAvatarKeys]),
+    ];
+    if (allAvatarKeys.length) {
+      const signed = await presignViewUrls(allAvatarKeys).catch(() => []);
+      const combined: Record<string, string> = {};
+      for (const { key, viewUrl } of signed) {
+        if (viewUrl) combined[key] = viewUrl;
+      }
+      for (const k of noteAvatarKeys)
+        if (combined[k]) noteImageUrlMap[k] = combined[k];
+      for (const k of activityAvatarKeys)
+        if (combined[k]) activityImageUrlMap[k] = combined[k];
+    }
   } catch (err) {
     console.error("[AdminOverview] failed to load:", err);
   }
@@ -59,7 +84,7 @@ export default async function AdminOverview() {
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_340px] 2xl:grid-cols-[1fr_400px]">
         <div className="flex flex-col gap-4">
           <RecentLeads leads={recentLeads} />
-          <ActivityWidget logs={recentLogs} />
+          <ActivityWidget logs={recentLogs} imageUrlMap={activityImageUrlMap} />
         </div>
 
         <div className="flex flex-col gap-4">
@@ -71,7 +96,7 @@ export default async function AdminOverview() {
             products={draftProducts}
             draftCount={stats.draftCount}
           />
-          <NotesWidget notes={notes} />
+          <NotesWidget notes={notes} imageUrlMap={noteImageUrlMap} />
         </div>
       </div>
     </div>

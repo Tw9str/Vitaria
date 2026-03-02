@@ -9,6 +9,7 @@ export interface LogPayload {
   entityTitle?: string;
   actorEmail: string;
   actorName?: string | null;
+  actorId?: string | null;
   severity?: LogSeverity;
   detail?: string;
 }
@@ -27,6 +28,7 @@ export async function appendLog(payload: LogPayload): Promise<void> {
         entityTitle: payload.entityTitle ?? null,
         actorEmail: payload.actorEmail,
         actorName: payload.actorName ?? null,
+        actorId: payload.actorId ?? null,
         severity: payload.severity ?? "info",
         detail: payload.detail ?? null,
       },

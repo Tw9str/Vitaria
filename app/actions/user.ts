@@ -23,9 +23,10 @@ async function getAdminSession() {
 // ---------------------------------------------------------------------------
 
 export type CreateUserState = {
-  fieldErrors?: { email?: string[] };
+  fieldErrors?: { email?: string[]; name?: string[] };
   formError?: string;
   success?: boolean;
+  values?: { name: string; email: string };
 } | null;
 
 const createUserSchema = z.object({
@@ -34,6 +35,10 @@ const createUserSchema = z.object({
     .min(1, "Email is required.")
     .email("Please enter a valid email address.")
     .toLowerCase(),
+  name: z
+    .string()
+    .min(1, "Name is required.")
+    .max(120, "Name must be 120 characters or fewer."),
   role: z.enum(["admin", "editor"]).default("editor"),
 });
 
@@ -45,20 +50,21 @@ export async function createUserAction(
 
   const raw = {
     email: String(formData.get("email") ?? "").trim(),
+    name: String(formData.get("name") ?? "").trim(),
     role: String(formData.get("role") ?? "editor"),
   };
 
   const parsed = createUserSchema.safeParse(raw);
   if (!parsed.success) {
-    const fieldErrors: { email?: string[] } = {};
+    const fieldErrors: { email?: string[]; name?: string[] } = {};
     for (const issue of parsed.error.issues) {
-      const field = issue.path[0] as "email" | undefined;
+      const field = issue.path[0] as "email" | "name" | undefined;
       if (field) {
         if (!fieldErrors[field]) fieldErrors[field] = [];
         fieldErrors[field]!.push(issue.message);
       }
     }
-    return { fieldErrors };
+    return { fieldErrors, values: { name: raw.name, email: raw.email } };
   }
 
   const existing = await prisma.user.findUnique({
@@ -68,6 +74,7 @@ export async function createUserAction(
   if (existing) {
     return {
       fieldErrors: { email: ["A user with this email already exists."] },
+      values: { name: raw.name, email: raw.email },
     };
   }
 
@@ -75,6 +82,7 @@ export async function createUserAction(
     await prisma.user.create({
       data: {
         email: parsed.data.email,
+        name: parsed.data.name,
         role: parsed.data.role as Role,
       },
     });
@@ -85,10 +93,11 @@ export async function createUserAction(
   void appendLog({
     actorEmail: actorSession?.user?.email ?? "unknown",
     actorName: actorSession?.user?.name ?? undefined,
+    actorId: actorSession?.user?.id ?? null,
     action: "USER_CREATED",
     entity: "user",
     entityTitle: parsed.data.email,
-    detail: `Role: ${parsed.data.role}`,
+    detail: `${parsed.data.name} · Role: ${parsed.data.role}`,
   });
 
   revalidatePath("/admin/users");
@@ -120,6 +129,7 @@ export async function updateUserNameAction(
     void appendLog({
       actorEmail: session?.user?.email ?? "unknown",
       actorName: session?.user?.name ?? undefined,
+      actorId: session?.user?.id ?? null,
       action: "USER_RENAMED",
       entity: "user",
       entityId: userId,
@@ -156,6 +166,7 @@ export async function updateUserRoleAction(
     void appendLog({
       actorEmail: session?.user?.email ?? "unknown",
       actorName: session?.user?.name ?? undefined,
+      actorId: session?.user?.id ?? null,
       action: "USER_ROLE_CHANGED",
       entity: "user",
       entityId: userId,
@@ -165,6 +176,56 @@ export async function updateUserRoleAction(
   } catch {
     return { error: "Failed to update role." };
   }
+
+  revalidatePath("/admin/users");
+  return {};
+}
+
+// ---------------------------------------------------------------------------
+// Block / unblock user
+// ---------------------------------------------------------------------------
+
+export async function toggleBlockUserAction(
+  userId: string,
+  blocked: boolean,
+): Promise<{ error?: string }> {
+  const session = await getAdminSession();
+
+  // Prevent self-block
+  const selfEmail = session.user?.email ?? "";
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true },
+  });
+  if (target?.email && target.email === selfEmail) {
+    return { error: "You cannot block your own account." };
+  }
+
+  try {
+    await prisma.user.update({ where: { id: userId }, data: { blocked } });
+    // If blocking, also kill their active sessions immediately.
+    if (blocked) {
+      await prisma.session.deleteMany({ where: { userId } });
+    }
+  } catch {
+    return { error: `Failed to ${blocked ? "block" : "unblock"} user.` };
+  }
+
+  const targetLabel = target?.name ?? target?.email ?? userId;
+  const actorLabel = session?.user?.name ?? session?.user?.email ?? "Someone";
+  void appendLog({
+    actorEmail: session?.user?.email ?? "unknown",
+    actorName: session?.user?.name ?? undefined,
+    actorId: session?.user?.id ?? null,
+    action: blocked ? "USER_BLOCKED" : "USER_UNBLOCKED",
+    entity: "user",
+    entityId: userId,
+    entityTitle: targetLabel,
+    detail: blocked
+      ? `${actorLabel} blocked ${targetLabel}`
+      : `${actorLabel} unblocked ${targetLabel}`,
+    severity: blocked ? "warning" : "info",
+  });
 
   revalidatePath("/admin/users");
   return {};
@@ -183,7 +244,7 @@ export async function deleteUserAction(
   const selfEmail = session.user?.email ?? "";
   const target = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true },
+    select: { email: true, name: true },
   });
   if (target?.email && target.email === selfEmail) {
     return { error: "You cannot delete your own account." };
@@ -195,13 +256,17 @@ export async function deleteUserAction(
     return { error: "Failed to delete user." };
   }
 
+  const targetLabel = target?.name ?? target?.email ?? userId;
+  const actorLabel = session?.user?.name ?? session?.user?.email ?? "Someone";
   void appendLog({
     actorEmail: session?.user?.email ?? "unknown",
     actorName: session?.user?.name ?? undefined,
+    actorId: session?.user?.id ?? null,
     action: "USER_DELETED",
     entity: "user",
     entityId: userId,
-    entityTitle: target?.email ?? undefined,
+    entityTitle: targetLabel,
+    detail: `${actorLabel} deleted ${targetLabel}`,
     severity: "warning",
   });
 

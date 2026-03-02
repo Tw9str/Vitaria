@@ -287,7 +287,7 @@ export default function Contact({
               href="https://wa.me/905357331290"
               icon={<Whatsapp />}
               label="Whatsapp"
-              value="+90 ..."
+              value="+905357331290"
             />
             <InfoRow
               href="#"
