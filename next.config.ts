@@ -37,10 +37,8 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "pub-367295292408455583503768732d4023.r2.dev",
-        pathname: "/**",
       },
     ],
-    minimumCacheTTL: 60,
   },
 
   async headers() {
