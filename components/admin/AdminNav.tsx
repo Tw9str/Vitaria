@@ -82,6 +82,27 @@ const nav: {
     ),
   },
   {
+    label: "Contact",
+    href: "/admin/contact",
+    exact: false,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+      </svg>
+    ),
+  },
+  {
     label: "Logs",
     href: "/admin/logs",
     exact: false,
@@ -135,7 +156,13 @@ const nav: {
   },
 ];
 
-export default function AdminNav({ role }: { role?: string }) {
+export default function AdminNav({
+  role,
+  collapsed,
+}: {
+  role?: string;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
@@ -148,16 +175,21 @@ export default function AdminNav({ role }: { role?: string }) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2.5 rounded-xl px-3 py-2 font-medium transition-colors ${
+              title={collapsed ? label : undefined}
+              className={`flex items-center rounded-xl py-2 font-medium transition-colors ${
+                collapsed ? "justify-center px-2" : "gap-2.5 px-3"
+              } ${
                 active
                   ? "bg-brand-ink text-white"
                   : "text-muted hover:bg-black/10 hover:text-text"
               }`}
             >
-              <span className={active ? "text-white" : "text-subtle"}>
+              <span
+                className={`shrink-0 ${active ? "text-white" : "text-subtle"}`}
+              >
                 {icon}
               </span>
-              {label}
+              {!collapsed && label}
             </Link>
           );
         })}

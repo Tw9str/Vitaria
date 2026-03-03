@@ -51,8 +51,7 @@ const ENTITY_ICONS: Record<string, React.ReactNode> = {
       className="h-3.5 w-3.5"
       aria-hidden
     >
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
+      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   ),
   user: (
@@ -102,17 +101,38 @@ const ENTITY_ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
+const ENTITY_ICON_COLORS: Record<string, string> = {
+  product: "text-blue-500",
+  lead: "text-gold",
+  user: "text-purple-500",
+  note: "text-green-500",
+  profile: "text-orange-500",
+};
+
 const SEVERITY_BADGE: Record<string, string> = {
   info: "bg-black/10 text-muted",
   warning: "bg-amber-400/15 text-amber-600 dark:text-amber-400",
   error: "bg-red-500/10 text-red-500",
 };
 
+const SEVERITY_DOT: Record<string, string> = {
+  info: "bg-muted",
+  warning: "bg-amber-500",
+  error: "bg-red-500",
+};
+
 function SeverityBadge({ severity }: { severity: string }) {
   return (
     <span
-      className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${SEVERITY_BADGE[severity] ?? SEVERITY_BADGE.info}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+        SEVERITY_BADGE[severity] ?? SEVERITY_BADGE.info
+      }`}
     >
+      <span
+        className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+          SEVERITY_DOT[severity] ?? SEVERITY_DOT.info
+        }`}
+      />
       {severity}
     </span>
   );
@@ -152,48 +172,141 @@ export default function ActivityWidget({ logs, imageUrlMap = {} }: Props) {
           No activity yet.
         </p>
       ) : (
-        <div className="divide-y divide-border">
-          {logs.map((log) => {
-            const actorLabel = log.actorName ?? log.actorEmail;
-            const actorInitial = actorLabel.charAt(0).toUpperCase();
-            const avatarUrl = log.actor?.image
-              ? imageUrlMap[log.actor.image]
-              : null;
-            return (
-              <div key={log.id} className="flex items-center gap-3 px-5 py-3">
-                {/* Actor avatar */}
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt=""
-                    className="h-7 w-7 rounded-full object-cover shrink-0"
-                  />
-                ) : (
-                  <span className="h-7 w-7 rounded-full bg-brand-ink text-white text-[10px] font-semibold flex items-center justify-center shrink-0">
-                    {actorInitial}
+        <>
+          {/* Column headers — visible on md+ */}
+          <div className="hidden md:grid md:grid-cols-[20px_minmax(0,1fr)_minmax(0,160px)_80px_68px] items-center gap-x-4 border-b border-border bg-bg/50 px-5 py-2">
+            <span />
+            <span className="text-xs font-medium text-subtle">Action</span>
+            <span className="text-xs font-medium text-subtle">By</span>
+            <span className="text-xs font-medium text-subtle">Severity</span>
+            <span className="text-xs font-medium text-subtle text-right">
+              Time
+            </span>
+          </div>
+
+          <div className="divide-y divide-border">
+            {logs.map((log) => {
+              const actorLabel = log.actorName ?? log.actorEmail;
+              const actorInitial = actorLabel.charAt(0).toUpperCase();
+              const avatarUrl = log.actor?.image
+                ? imageUrlMap[log.actor.image]
+                : null;
+              return (
+                <div
+                  key={log.id}
+                  className="flex items-center gap-3 px-5 py-3 md:grid md:grid-cols-[20px_minmax(0,1fr)_minmax(0,160px)_80px_68px] md:gap-x-4"
+                >
+                  {/* Entity icon — own column on md+, hidden on mobile */}
+                  <span
+                    className={`hidden md:inline-flex items-center justify-center shrink-0 ${
+                      ENTITY_ICON_COLORS[log.entity] ?? "text-muted"
+                    }`}
+                  >
+                    {ENTITY_ICONS[log.entity] ?? (
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                        aria-hidden
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                    )}
                   </span>
-                )}
 
-                {/* Action + entity title */}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-text">
-                    {ACTION_LABELS[log.action] ?? log.action}
-                  </p>
-                  <p className="truncate text-xs text-muted">
-                    {log.entityTitle
-                      ? `${log.entityTitle} · ${actorLabel}`
-                      : actorLabel}
-                  </p>
+                  {/* Actor avatar — mobile hidden, md+ handled in By column */}
+
+                  {/* Action + entity title */}
+                  <div className="min-w-0 flex-1 md:flex-none">
+                    <div className="flex items-center gap-1.5 md:block">
+                      {/* Icon visible on mobile inline with label */}
+                      <span
+                        className={`md:hidden shrink-0 ${
+                          ENTITY_ICON_COLORS[log.entity] ?? "text-muted"
+                        }`}
+                      >
+                        {ENTITY_ICONS[log.entity] ?? (
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="h-3.5 w-3.5"
+                            aria-hidden
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                          </svg>
+                        )}
+                      </span>
+                      <p className="truncate text-sm font-medium text-text">
+                        {ACTION_LABELS[log.action] ?? log.action}
+                      </p>
+                    </div>
+                    {log.entityTitle && (
+                      <p className="truncate text-xs text-muted md:hidden">
+                        <span className="font-medium text-text">
+                          {actorLabel}
+                        </span>
+                        {" · "}
+                        {log.entityTitle}
+                      </p>
+                    )}
+                    {!log.entityTitle && (
+                      <p className="truncate text-xs text-muted md:hidden">
+                        <span className="font-medium text-text">
+                          {actorLabel}
+                        </span>
+                      </p>
+                    )}
+                    {log.entityTitle && (
+                      <p className="hidden md:block truncate text-xs text-muted">
+                        {log.entityTitle}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* By column — md+ with avatar */}
+                  <div className="hidden md:flex items-center gap-2 min-w-0">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt=""
+                        className="h-6 w-6 rounded-full object-cover shrink-0"
+                      />
+                    ) : (
+                      <span className="h-6 w-6 rounded-full bg-brand-ink text-white text-[10px] font-semibold flex items-center justify-center shrink-0">
+                        {actorInitial}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-xs text-text">
+                        {log.actorName ?? log.actorEmail}
+                      </p>
+                      {log.actorName && (
+                        <p className="truncate text-xs text-muted">
+                          {log.actorEmail}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <SeverityBadge severity={log.severity} />
+                  </div>
+                  <span className="shrink-0 text-xs text-subtle md:text-right">
+                    {formatRelative(log.createdAt)}
+                  </span>
                 </div>
-
-                <SeverityBadge severity={log.severity} />
-                <span className="shrink-0 text-xs text-subtle">
-                  {formatRelative(log.createdAt)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

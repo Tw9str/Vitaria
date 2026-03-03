@@ -134,6 +134,26 @@ model Note {
   updatedAt DateTime @updatedAt
 }
 
+// ── Site configuration (singleton, id = "main") ──────────────────────────
+type ContactChannel {
+  value   String
+  visible Boolean @default(true)
+}
+
+model SiteConfig {
+  id                 String          @id @default("main") @map("_id")
+  email              ContactChannel?
+  phone              ContactChannel?
+  whatsapp           ContactChannel?
+  facebook           ContactChannel?
+  instagram          ContactChannel?
+  twitter            ContactChannel?
+  linkedin           ContactChannel?
+  whatsIncludedTitle String?
+  whatsIncludedItems Json?
+  updatedAt          DateTime        @updatedAt
+}
+
 // severity: "info" | "warning" | "error"
 model ActivityLog {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId

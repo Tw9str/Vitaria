@@ -76,18 +76,18 @@ export default async function AdminOverview() {
       </div>
 
       {/* Stats */}
-      <div className="mt-5">
+      <div className="mt-3 lg:mt-5">
         <StatCards stats={stats} />
       </div>
 
       {/* Main grid: leads table + sidebar */}
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_340px] 2xl:grid-cols-[1fr_400px]">
-        <div className="flex flex-col gap-4">
+      <div className="mt-3 lg:mt-4 grid grid-cols-1 gap-3 lg:gap-4 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_340px] 2xl:grid-cols-[1fr_400px]">
+        <div className="flex flex-col gap-3 lg:gap-4">
           <RecentLeads leads={recentLeads} />
           <ActivityWidget logs={recentLogs} imageUrlMap={activityImageUrlMap} />
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 lg:gap-4">
           <LeadsSparkline
             weekCount={stats.weekLeadsCount}
             sparkCounts={sparkCounts}

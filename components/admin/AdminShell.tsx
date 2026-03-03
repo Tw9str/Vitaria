@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AdminNav from "./AdminNav";
 import AdminActions from "./AdminActions";
+import CollapsibleSidebar from "./CollapsibleSidebar";
 import { ToastProvider } from "@/components/shared/Toaster";
 
 export type ShellUser = {
@@ -30,8 +31,12 @@ export default function AdminShell({
 }) {
   return (
     <div className="min-h-dvh bg-bg">
-      <div className="mx-auto max-w-screen-2xl px-5 py-6 grid gap-4 lg:grid-cols-[240px_1fr]">
-        <aside className="rounded-xl bg-surface border border-default flex flex-col h-fit lg:sticky lg:top-6">
+      <div className="mx-auto max-w-screen-2xl flex items-start gap-0 lg:gap-4 lg:px-5 lg:py-6 lg:grid lg:grid-cols-[240px_1fr]">
+        {/* Small screens: collapsible icon sidebar */}
+        <CollapsibleSidebar user={user} />
+
+        {/* lg+: full sidebar */}
+        <aside className="hidden lg:flex rounded-xl bg-surface border border-default flex-col h-fit lg:sticky lg:top-6">
           {/* User header */}
           <div className="flex flex-col items-center gap-2 px-4 pt-6 pb-5 border-b border-border text-center">
             <Link
@@ -100,7 +105,7 @@ export default function AdminShell({
           </div>
         </aside>
 
-        <main className="rounded-xl bg-surface border border-default p-6 min-w-0">
+        <main className="flex-1 min-w-0 p-4 sm:p-5 lg:p-6 lg:rounded-xl lg:border lg:border-default lg:bg-surface">
           <ToastProvider>{children}</ToastProvider>
         </main>
       </div>

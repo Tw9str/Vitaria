@@ -10,7 +10,13 @@ function getInitialTheme(): Theme {
   return t === "light" ? "light" : "dark";
 }
 
-export default function ThemeToggle({ className }: { className?: string }) {
+export default function ThemeToggle({
+  className,
+  iconOnly,
+}: {
+  className?: string;
+  iconOnly?: boolean;
+}) {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
@@ -42,7 +48,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
       title={`Theme: ${label}`}
     >
       <span className="text-base leading-none">{icon}</span>
-      {className && <span>{label}</span>}
+      {className && !iconOnly && <span>{label}</span>}
     </button>
   );
 }

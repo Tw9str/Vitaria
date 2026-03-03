@@ -178,7 +178,7 @@ export default function HeroSlider({
             key={slide.image}
             aria-hidden={!isActive}
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-            style={{ opacity: isActive ? 1 : 0, zIndex: 1 }}
+            style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 2 : 1 }}
           >
             <Image
               src={slide.image}

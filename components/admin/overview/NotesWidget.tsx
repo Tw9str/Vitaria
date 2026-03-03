@@ -202,7 +202,7 @@ export default function NotesWidget({ notes, imageUrlMap = {} }: Props) {
             No notes yet.
           </p>
         ) : (
-          <div className="max-h-104 overflow-y-auto divide-y divide-border">
+          <div className="max-h-120 overflow-y-auto divide-y divide-border">
             {notes.map((note) => (
               <div
                 key={note.id}

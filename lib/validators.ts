@@ -76,10 +76,11 @@ export const leadSchema = z.object({
   email: z.email("Please enter a valid email address."),
   company: z
     .string()
-    .min(1, "Company name is required.")
-    .max(120, "Company must be 120 characters or fewer."),
+    .max(120, "Company must be 120 characters or fewer.")
+    .optional()
+    .or(z.literal("")),
   website: z
-    .string()
+    .url("Please enter a valid URL (e.g. https://yourstore.com).")
     .max(200, "Website must be 200 characters or fewer.")
     .optional()
     .or(z.literal("")),
@@ -88,14 +89,12 @@ export const leadSchema = z.object({
   }),
   region: z
     .string()
-    .max(80, "Region must be 80 characters or fewer.")
-    .optional()
-    .or(z.literal("")),
+    .min(1, "Country / Region is required.")
+    .max(80, "Region must be 80 characters or fewer."),
   message: z
     .string()
-    .max(2000, "Message must be 2000 characters or fewer.")
-    .optional()
-    .or(z.literal("")),
+    .min(1, "Message is required.")
+    .max(500, "Message must be 500 characters or fewer."),
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;

@@ -16,6 +16,7 @@ export type OverviewStats = {
 export type RecentLead = {
   id: string;
   name: string;
+  email: string;
   company: string;
   type: string;
   status: string;
@@ -70,6 +71,7 @@ export async function getOverviewData(email: string): Promise<OverviewData> {
       select: {
         id: true,
         name: true,
+        email: true,
         company: true,
         type: true,
         status: true,

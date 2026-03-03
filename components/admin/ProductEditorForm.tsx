@@ -509,6 +509,8 @@ export default function ProductEditorForm({
   const tempId = useRef<string>(crypto.randomUUID());
   const productId = product?.id ?? tempId.current;
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [heroOver, setHeroOver] = useState(false);
+  const [galleryOver, setGalleryOver] = useState(false);
 
   const toast = useToast();
   const router = useRouter();
@@ -546,7 +548,7 @@ export default function ProductEditorForm({
   const dragFrom = useRef<number | null>(null);
 
   return (
-    <div>
+    <div className="max-w-3xl mx-auto">
       <form action={formAction} noValidate className="space-y-4">
         {/* ── Sticky action bar ─────────────────────────────────── */}
         <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-surface/80 backdrop-blur-xl shadow-[0_1px_0_0_var(--color-border)] flex items-center justify-between gap-3 mb-2">
@@ -681,56 +683,119 @@ export default function ProductEditorForm({
           title="Hero image"
           description="Primary image shown at the top of the product page."
         >
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="rounded-full px-4 py-2 font-semibold border border-default bg-surface hover:brightness-110 cursor-pointer">
-              Upload hero
-              <input
-                type="file"
-                accept={ACCEPTED_IMAGE_TYPES}
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.currentTarget.files?.[0];
-                  if (f) void uploadHero(f);
-                  e.currentTarget.value = "";
-                }}
-              />
-            </label>
+          {/* Dropzone */}
+          <label
+            className={`relative flex flex-col items-center justify-center gap-2 w-full rounded-2xl border-2 border-dashed transition-colors cursor-pointer overflow-hidden ${
+              heroOver
+                ? "border-brand-ink bg-brand-ink/5"
+                : viewUrlMap[heroKey]
+                  ? "border-border hover:border-text/30"
+                  : "border-border hover:border-text/30 bg-black/[.03] dark:bg-white/[.03]"
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setHeroOver(true);
+            }}
+            onDragEnter={() => setHeroOver(true)}
+            onDragLeave={() => setHeroOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setHeroOver(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f) void uploadHero(f);
+            }}
+          >
+            <input
+              type="file"
+              accept={ACCEPTED_IMAGE_TYPES}
+              className="hidden"
+              onChange={(e) => {
+                const f = e.currentTarget.files?.[0];
+                if (f) void uploadHero(f);
+                e.currentTarget.value = "";
+              }}
+            />
 
-            {heroUi.status === "uploading" && (
-              <Progress
-                label={`Uploading… ${heroUi.progress}%`}
-                value={heroUi.progress}
-              />
-            )}
-            {heroUi.status === "error" && (
-              <div className="text-xs text-red-500">
-                {heroUi.error ?? "Hero upload failed"}
+            {/* Preview fills the zone when an image exists */}
+            {viewUrlMap[heroKey] ? (
+              <>
+                <div className="relative h-52 w-full">
+                  <Image
+                    src={viewUrlMap[heroKey]}
+                    alt="Hero"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 800px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                {/* Replace overlay on hover */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+                  <span className="rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-black">
+                    Replace image
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center gap-1.5 px-6 py-10 text-center">
+                <svg
+                  className="h-8 w-8 text-muted"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                  />
+                </svg>
+                <p className="text-sm font-medium text-text">
+                  {heroOver ? "Drop to upload" : "Drop image here"}
+                </p>
+                <p className="text-xs text-subtle">or click to browse</p>
               </div>
             )}
+          </label>
 
-            <div className="text-xs text-subtle break-all">
-              {heroKey ? (
-                <>
-                  Stored key: <span className="font-mono">{heroKey}</span>
-                </>
-              ) : (
-                "No hero image uploaded yet."
-              )}
-            </div>
-          </div>
+          {/* Progress & error */}
+          {heroUi.status === "uploading" && (
+            <Progress
+              label={`Uploading… ${heroUi.progress}%`}
+              value={heroUi.progress}
+            />
+          )}
+          {heroUi.status === "error" && (
+            <p className="text-xs text-red-500">
+              {heroUi.error ?? "Hero upload failed"}
+            </p>
+          )}
 
-          {viewUrlMap[heroKey] ? (
-            <div className="relative mt-2 h-48 w-full overflow-hidden rounded-2xl border border-default">
-              <Image
-                src={viewUrlMap[heroKey]}
-                alt="Hero"
-                fill
-                sizes="(max-width: 768px) 100vw, 800px"
-                className="object-cover"
-                unoptimized
-              />
+          {/* Filename chip */}
+          {heroKey && heroUi.status !== "uploading" && (
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-black/[.03] dark:bg-white/[.03] px-3 py-2">
+              <svg
+                className="h-3.5 w-3.5 shrink-0 text-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 7.5h18"
+                />
+              </svg>
+              <span className="text-xs text-subtle truncate font-mono">
+                {heroKey.split("/").pop()}
+              </span>
+              <span className="ml-auto shrink-0 rounded-full bg-green-500/10 px-2 py-0.5 text-[11px] font-semibold text-green-600 dark:text-green-400">
+                Saved
+              </span>
             </div>
-          ) : null}
+          )}
         </SectionCard>
 
         {/* ── Specs ────────────────────────────────────────────── */}
@@ -756,31 +821,68 @@ export default function ProductEditorForm({
           title="Gallery"
           description="Additional images shown in the product carousel. Drag to reorder."
         >
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="rounded-full px-4 py-2 font-semibold border border-default bg-surface hover:brightness-110 cursor-pointer">
-              Add images
-              <input
-                type="file"
-                multiple
-                accept={ACCEPTED_IMAGE_TYPES}
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.currentTarget.files;
-                  if (f?.length) addGalleryFiles(f);
-                  e.currentTarget.value = "";
-                }}
+          {/* Gallery dropzone */}
+          <label
+            className={`flex flex-col items-center justify-center gap-1.5 w-full rounded-2xl border-2 border-dashed transition-colors cursor-pointer px-6 py-6 text-center ${
+              galleryOver
+                ? "border-brand-ink bg-brand-ink/5"
+                : "border-border hover:border-text/30 bg-black/[.03] dark:bg-white/[.03]"
+            }`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setGalleryOver(true);
+            }}
+            onDragEnter={() => setGalleryOver(true)}
+            onDragLeave={() => setGalleryOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setGalleryOver(false);
+              const f = e.dataTransfer.files;
+              if (f?.length) addGalleryFiles(f);
+            }}
+          >
+            <input
+              type="file"
+              multiple
+              accept={ACCEPTED_IMAGE_TYPES}
+              className="hidden"
+              onChange={(e) => {
+                const f = e.currentTarget.files;
+                if (f?.length) addGalleryFiles(f);
+                e.currentTarget.value = "";
+              }}
+            />
+            <svg
+              className="h-6 w-6 text-muted"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
               />
-            </label>
+            </svg>
+            <p className="text-sm font-medium text-text">
+              {galleryOver ? "Drop to add" : "Drop images here"}
+            </p>
+            <p className="text-xs text-subtle">
+              or click to browse · multiple allowed
+            </p>
+          </label>
 
+          {/* Counts + error */}
+          {(galleryKeys.length > 0 || uploads.length > 0) && (
             <div className="text-xs text-subtle">
               {galleryKeys.length} saved •{" "}
               {uploads.filter((u) => u.status === "queued").length} queued
             </div>
-
-            {galleryError && (
-              <p className="w-full text-xs text-red-500">{galleryError}</p>
-            )}
-          </div>
+          )}
+          {galleryError && (
+            <p className="text-xs text-red-500">{galleryError}</p>
+          )}
 
           {galleryKeys.length ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
