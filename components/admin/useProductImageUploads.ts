@@ -10,10 +10,10 @@ import {
 } from "react";
 import {
   presignProductImageUploads,
-  presignViewUrls,
   deleteStorageKeysAction,
 } from "@/app/actions/createUploadUrl";
 import { imageFileSchema } from "@/lib/validators";
+import { getPublicUrl } from "@/lib/site";
 
 // ---------------------------------------------------------------------------
 // Upload queue reducer (inlined to avoid module-resolution issues)
@@ -73,7 +73,6 @@ function uploadsReducer(
 }
 
 const MAX_GALLERY_IMAGES = 12;
-const VIEW_URL_REFRESH_MS = 120_000;
 
 // ---------------------------------------------------------------------------
 // PUT with XHR progress
@@ -108,40 +107,6 @@ function arrayMove<T>(arr: T[], from: number, to: number): T[] {
 }
 
 // ---------------------------------------------------------------------------
-// Presigned view-URL refresh
-// ---------------------------------------------------------------------------
-function usePresignedViewUrls(keys: string[], refreshMs = VIEW_URL_REFRESH_MS) {
-  const [map, setMap] = useState<Record<string, string>>({});
-  const stableKeys = useMemo(() => keys.filter(Boolean), [keys]);
-
-  useEffect(() => {
-    if (!stableKeys.length) return;
-    let cancelled = false;
-
-    const refresh = async () => {
-      try {
-        const res = await presignViewUrls({ keys: stableKeys });
-        if (cancelled) return;
-        const next: Record<string, string> = {};
-        for (const r of res) next[r.key] = r.viewUrl;
-        setMap((prev) => ({ ...prev, ...next }));
-      } catch {
-        // best-effort
-      }
-    };
-
-    void refresh();
-    const t = setInterval(refresh, refreshMs);
-    return () => {
-      cancelled = true;
-      clearInterval(t);
-    };
-  }, [stableKeys, refreshMs]);
-
-  return map;
-}
-
-// ---------------------------------------------------------------------------
 // Main hook
 // ---------------------------------------------------------------------------
 type HeroUiState = {
@@ -169,12 +134,15 @@ export function useProductImageUploads({
   const [uploads, dispatchUploads] = useReducer(uploadsReducer, []);
   const [galleryError, setGalleryError] = useState("");
 
-  // ── Presigned view URLs ──────────────────────────────────────────────────
+  // ── Public view URLs (permanent — bucket is public) ———————————————————
   const previewKeys = useMemo(
     () => [heroKey, ...galleryKeys].filter(Boolean),
     [heroKey, galleryKeys],
   );
-  const viewUrlMap = usePresignedViewUrls(previewKeys);
+  const viewUrlMap = useMemo(
+    () => Object.fromEntries(previewKeys.map((k) => [k, getPublicUrl(k)])),
+    [previewKeys],
+  );
 
   // ── Object-URL cleanup ───────────────────────────────────────────────────
   useEffect(() => {

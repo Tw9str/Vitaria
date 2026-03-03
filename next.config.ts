@@ -21,12 +21,12 @@ const securityHeaders = [
       "frame-src https://challenges.cloudflare.com",
       // Styles: Next.js injects inline styles
       "style-src 'self' 'unsafe-inline'",
-      // Images: self + R2 wildcard
-      "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com",
+      // Images: self + R2 public bucket + R2 private bucket
+      "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com",
       // Fonts: self
       "font-src 'self'",
-      // API calls: self + Turnstile + R2 presigned uploads
-      "connect-src 'self' https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com",
+      // API calls: self + Turnstile + R2 upload targets
+      "connect-src 'self' https://challenges.cloudflare.com https://*.r2.dev https://*.r2.cloudflarestorage.com",
     ].join("; "),
   },
 ];
@@ -36,9 +36,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.r2.cloudflarestorage.com",
+        hostname: "pub-367295292408455583503768732d4023.r2.dev",
+        pathname: "/**",
       },
     ],
+    minimumCacheTTL: 60,
   },
 
   async headers() {

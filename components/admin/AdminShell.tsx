@@ -74,7 +74,7 @@ export default function AdminShell({
               </span>
             </Link>
             <div className="min-w-0 w-full">
-              <p className="font-semibold text-text truncate">
+              <p className="font-semibold text-text truncate capitalize">
                 {user.name ?? user.email}
               </p>
               {user.name && (
@@ -83,10 +83,12 @@ export default function AdminShell({
                 </p>
               )}
               <span
-                className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  user.role === "admin"
-                    ? "bg-gold/15 text-gold"
-                    : "bg-black/10 text-subtle"
+                className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+                  user.role === "owner"
+                    ? "bg-gold/20 text-gold"
+                    : user.role === "admin"
+                      ? "bg-blue-500/15 text-blue-400"
+                      : "bg-purple-500/15 text-purple-400"
                 }`}
               >
                 {user.role}

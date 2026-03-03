@@ -10,6 +10,18 @@ export type WhatsIncludedItem = {
   text: string;
 };
 
+export type HeroSlide = {
+  id: string;
+  image: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaHref: string;
+  cta2Text: string;
+  cta2Href: string;
+  cta2Visible: boolean;
+};
+
 export type SiteConfigData = {
   id: string;
   email: ContactChannelData | null;
@@ -21,6 +33,9 @@ export type SiteConfigData = {
   linkedin: ContactChannelData | null;
   whatsIncludedTitle: string | null;
   whatsIncludedItems: WhatsIncludedItem[] | null;
+  heroSlides: HeroSlide[] | null;
+  heroAutoplay: boolean;
+  heroInterval: number;
   updatedAt: Date;
 };
 
@@ -35,6 +50,9 @@ const DEFAULT_CONFIG: SiteConfigData = {
   linkedin: null,
   whatsIncludedTitle: null,
   whatsIncludedItems: null,
+  heroSlides: null,
+  heroAutoplay: true,
+  heroInterval: 5000,
   updatedAt: new Date(0),
 };
 
@@ -48,5 +66,10 @@ export async function getSiteConfig(): Promise<SiteConfigData> {
     whatsIncludedItems: Array.isArray(cfg.whatsIncludedItems)
       ? (cfg.whatsIncludedItems as WhatsIncludedItem[])
       : null,
+    heroSlides: Array.isArray(cfg.heroSlides)
+      ? (cfg.heroSlides as HeroSlide[])
+      : null,
+    heroAutoplay: cfg.heroAutoplay ?? true,
+    heroInterval: cfg.heroInterval ?? 5000,
   };
 }

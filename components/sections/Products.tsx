@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { getPublishedProducts } from "@/lib/db/products";
-import { presignViewUrls, buildViewUrlMap } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import EmptyState from "@/components/shared/EmptyState";
 import ProductsCarousel, {
   type MarqueeCard,
@@ -16,8 +16,7 @@ export default async function Products() {
   try {
     products = await getPublishedProducts({ take: 9 });
     const imageKeys = products.map((p) => p.image).filter(Boolean);
-    const signed = await presignViewUrls(imageKeys);
-    viewMap = buildViewUrlMap(signed);
+    viewMap = Object.fromEntries(imageKeys.map((k) => [k, getPublicUrl(k)]));
   } catch (err) {
     console.error("[Products] failed to load:", err);
     return (

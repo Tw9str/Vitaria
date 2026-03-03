@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useActionState, useState } from "react";
 import {
   updateSiteConfigAction,
+  updateWhatsIncludedAction,
   type SiteConfigActionState,
   type ChannelKey,
 } from "@/app/actions/siteConfig";
@@ -184,6 +185,11 @@ export default function ContactEditor({
     FormData
   >(updateSiteConfigAction, null);
 
+  const [wiState, wiAction, wiPending] = useActionState<
+    SiteConfigActionState,
+    FormData
+  >(updateWhatsIncludedAction, null);
+
   function patch(key: ChannelKey, partial: Partial<ChannelState>) {
     setChannels((prev) => ({
       ...prev,
@@ -227,229 +233,382 @@ export default function ContactEditor({
     setWiItems((prev) => [...prev, { icon: "", text: "" }]);
   }
 
+  const [tab, setTab] = useState<"channels" | "whats-included">("channels");
+
+  const TABS = [
+    {
+      key: "channels" as const,
+      label: "Channels",
+      desc: "Links & visibility",
+      icon: (
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+          />
+        </svg>
+      ),
+    },
+    {
+      key: "whats-included" as const,
+      label: "What's included",
+      desc: "Sidebar card",
+      icon: (
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={1.8}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+          />
+        </svg>
+      ),
+    },
+  ] as const;
+
   return (
     <div>
-      {/* ── Page header ───────────────────────────────────────────────────── */}
+      {/* ── Page header ─────────────────────────────────────────────────── */}
       <div className="mb-6">
         <h1 className="text-xl font-semibold">Contact</h1>
         <p className="mt-1 text-sm text-muted">
-          Manage contact channels and the sidebar card shown on the storefront.
+          Manage contact channels and the storefront sidebar card.
         </p>
       </div>
 
-      <form action={action}>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-          {/* ── Left: Contact channels ──────────────────────────────────── */}
-          <div>
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-subtle">
-              Contact channels
-            </p>
-            <div className="space-y-2.5">
-              {CHANNEL_META.map(({ key, label, placeholder, hint, icon }) => {
-                const ch = channels[key];
-                return (
-                  <div
-                    key={key}
-                    className={`rounded-2xl border bg-surface transition-colors ${
-                      ch.visible
-                        ? "border-border"
-                        : "border-border/50 opacity-60"
-                    }`}
-                  >
-                    {/* Row header */}
-                    <div className="flex items-center gap-3 px-4 py-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-black/5 dark:bg-white/5 text-muted">
-                        {icon}
-                      </span>
-                      <span className="flex-1 text-sm font-medium">
-                        {label}
-                      </span>
-                      <Toggle
-                        name={`${key}_visible`}
-                        checked={ch.visible}
-                        onChange={(v) => patch(key, { visible: v })}
-                      />
-                    </div>
-                    {/* Input */}
-                    <div className="border-t border-border/50 px-4 pb-4 pt-3">
-                      <input
-                        type="text"
-                        name={`${key}_value`}
-                        value={ch.value}
-                        onChange={(e) => patch(key, { value: e.target.value })}
-                        placeholder={placeholder}
-                        className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text placeholder:text-subtle outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
-                      />
-                      <p className="mt-1.5 text-xs text-subtle">{hint}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Right: What's included ──────────────────────────────────── */}
-          <div>
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-subtle">
-              What&apos;s included card
-            </p>
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <p className="mb-4 text-xs text-muted">
-                Displayed in the contact sidebar on the storefront.
-              </p>
-
-              {/* Section title */}
-              <div className="mb-5">
-                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-subtle">
-                  Card title
-                </label>
-                <input
-                  type="text"
-                  value={wiTitle}
-                  onChange={(e) => setWiTitle(e.target.value)}
-                  placeholder="What's included"
-                  className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text placeholder:text-subtle outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
-                />
-              </div>
-
-              {/* Items */}
-              <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-subtle">
-                Items
-              </label>
-              <div className="space-y-2">
-                {wiItems.map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={item.icon}
-                      onChange={(e) =>
-                        updateWiItem(idx, "icon", e.target.value)
-                      }
-                      maxLength={4}
-                      placeholder="📦"
-                      className="w-12 shrink-0 rounded-xl border border-border bg-bg px-2 py-2 text-center text-sm outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
-                    />
-                    <input
-                      type="text"
-                      value={item.text}
-                      onChange={(e) =>
-                        updateWiItem(idx, "text", e.target.value)
-                      }
-                      placeholder="Item description"
-                      className="min-w-0 flex-1 rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-subtle outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => moveWiItem(idx, -1)}
-                      disabled={idx === 0}
-                      title="Move up"
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-text disabled:opacity-30 transition cursor-pointer"
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 15l7-7 7 7"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveWiItem(idx, 1)}
-                      disabled={idx === wiItems.length - 1}
-                      title="Move down"
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-text disabled:opacity-30 transition cursor-pointer"
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeWiItem(idx)}
-                      title="Remove"
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-red-400 transition cursor-pointer"
-                    >
-                      <svg
-                        className="h-3.5 w-3.5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-
+      {/* ── Layout: sidebar nav + content ──────────────────────────────── */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* ── Sidebar nav ─────────────────────────────────────────────── */}
+        <nav className="flex shrink-0 gap-1 overflow-x-auto lg:w-52 lg:flex-col lg:overflow-visible">
+          {TABS.map(({ key, label, desc, icon }) => {
+            const active = tab === key;
+            return (
               <button
+                key={key}
                 type="button"
-                onClick={addWiItem}
-                className="mt-3 flex items-center gap-1.5 text-xs font-medium text-muted hover:text-text transition cursor-pointer"
+                onClick={() => setTab(key)}
+                className={`flex min-w-max items-center gap-3 rounded-2xl px-4 py-3 text-left transition cursor-pointer lg:min-w-0 lg:w-full ${
+                  active
+                    ? "bg-brand-ink text-white"
+                    : "bg-surface border border-border text-muted hover:text-text hover:border-gold/40"
+                }`}
               >
-                <svg
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
+                <span
+                  className={`shrink-0 ${active ? "text-white" : "text-subtle"}`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Add item
+                  {icon}
+                </span>
+                <span className="flex flex-col">
+                  <span
+                    className={`text-sm font-medium leading-tight ${active ? "text-white" : "text-text"}`}
+                  >
+                    {label}
+                  </span>
+                  <span
+                    className={`text-xs leading-tight ${active ? "text-white/70" : "text-subtle"}`}
+                  >
+                    {desc}
+                  </span>
+                </span>
               </button>
+            );
+          })}
+        </nav>
 
-              {/* Hidden inputs */}
-              <input type="hidden" name="whatsIncludedTitle" value={wiTitle} />
-              <input
-                type="hidden"
-                name="whatsIncludedItems"
-                value={JSON.stringify(wiItems)}
-              />
-            </div>
-          </div>
-        </div>
+        {/* ── Content ─────────────────────────────────────────────────── */}
+        <div className="min-w-0 flex-1">
+          {/* ── Channels ──────────────────────────────────────────────── */}
+          {tab === "channels" && (
+            <form action={action}>
+              <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+                {CHANNEL_META.map(
+                  ({ key, label, placeholder, hint, icon }, i) => {
+                    const ch = channels[key];
+                    return (
+                      <div
+                        key={key}
+                        className={`grid items-center gap-0 transition-opacity
+                        grid-cols-[1fr_auto] sm:grid-cols-[10rem_1fr_auto]
+                        ${i !== 0 ? "border-t border-border" : ""}
+                        ${!ch.visible ? "opacity-50" : ""}`}
+                      >
+                        {/* Label — hidden on very small, shown sm+ */}
+                        <div className="hidden sm:flex items-center gap-3 px-5 py-4">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/5 dark:bg-white/5 text-muted">
+                            {icon}
+                          </span>
+                          <span className="text-sm font-medium">{label}</span>
+                        </div>
 
-        {/* ── Footer ──────────────────────────────────────────────────────── */}
-        <div className="mt-6 flex items-center gap-4 border-t border-border pt-5">
-          <button
-            type="submit"
-            disabled={isPending}
-            className="flex items-center gap-2 rounded-full bg-brand-ink px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 transition cursor-pointer"
-          >
-            {isPending && <Spinner className="h-3.5 w-3.5" />}
-            {isPending ? "Saving…" : "Save changes"}
-          </button>
-          {state?.formError && <Alert variant="error">{state.formError}</Alert>}
-          {state?.success && <Alert variant="success">Changes saved.</Alert>}
+                        {/* Input */}
+                        <div className="min-w-0 border-border/50 px-4 py-3 sm:border-l">
+                          {/* Mobile: icon + label inline */}
+                          <div className="mb-1.5 flex items-center gap-2 sm:hidden">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-black/5 dark:bg-white/5 text-muted">
+                              {icon}
+                            </span>
+                            <span className="text-xs font-semibold text-muted">
+                              {label}
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            name={`${key}_value`}
+                            value={ch.value}
+                            onChange={(e) =>
+                              patch(key, { value: e.target.value })
+                            }
+                            placeholder={placeholder}
+                            className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-subtle outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
+                          />
+                          <p className="mt-1 text-xs text-subtle">{hint}</p>
+                        </div>
+
+                        {/* Toggle */}
+                        <div className="flex items-center justify-center border-l border-border/50 px-5 py-4">
+                          <Toggle
+                            name={`${key}_visible`}
+                            checked={ch.visible}
+                            onChange={(v) => patch(key, { visible: v })}
+                          />
+                        </div>
+                      </div>
+                    );
+                  },
+                )}
+              </div>
+
+              <div className="mt-5 flex items-center gap-4">
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="flex items-center gap-2 rounded-full bg-brand-ink px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 transition cursor-pointer"
+                >
+                  {isPending && <Spinner className="h-3.5 w-3.5" />}
+                  {isPending ? "Saving…" : "Save channels"}
+                </button>
+                {state?.formError && (
+                  <Alert variant="error">{state.formError}</Alert>
+                )}
+                {state?.success && (
+                  <Alert variant="success">Changes saved.</Alert>
+                )}
+              </div>
+            </form>
+          )}
+
+          {/* ── What's included ───────────────────────────────────────── */}
+          {tab === "whats-included" && (
+            <form action={wiAction}>
+              <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 xl:items-start">
+                {/* Editor */}
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                  <p className="mb-5 text-xs text-muted">
+                    Displayed in the contact sidebar on the storefront.
+                  </p>
+
+                  <div className="mb-5">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-subtle">
+                      Card title
+                    </label>
+                    <input
+                      type="text"
+                      value={wiTitle}
+                      onChange={(e) => setWiTitle(e.target.value)}
+                      placeholder="What's included"
+                      className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text placeholder:text-subtle outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
+                    />
+                  </div>
+
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-subtle">
+                    Items
+                  </label>
+                  <div className="space-y-2">
+                    {wiItems.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={item.icon}
+                          onChange={(e) =>
+                            updateWiItem(idx, "icon", e.target.value)
+                          }
+                          maxLength={4}
+                          placeholder="📦"
+                          className="w-12 shrink-0 rounded-xl border border-border bg-bg px-2 py-2 text-center text-sm outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
+                        />
+                        <input
+                          type="text"
+                          value={item.text}
+                          onChange={(e) =>
+                            updateWiItem(idx, "text", e.target.value)
+                          }
+                          placeholder="Item description"
+                          className="min-w-0 flex-1 rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-subtle outline-none focus:border-gold/60 focus:ring-4 focus:ring-gold/15 transition"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => moveWiItem(idx, -1)}
+                          disabled={idx === 0}
+                          title="Move up"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-text disabled:opacity-30 transition cursor-pointer"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 15l7-7 7 7"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveWiItem(idx, 1)}
+                          disabled={idx === wiItems.length - 1}
+                          title="Move down"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-text disabled:opacity-30 transition cursor-pointer"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeWiItem(idx)}
+                          title="Remove"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border text-muted hover:text-red-400 transition cursor-pointer"
+                        >
+                          <svg
+                            className="h-3.5 w-3.5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={addWiItem}
+                    className="mt-3 flex items-center gap-1.5 text-xs font-medium text-muted hover:text-text transition cursor-pointer"
+                  >
+                    <svg
+                      className="h-3.5 w-3.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Add item
+                  </button>
+
+                  <input
+                    type="hidden"
+                    name="whatsIncludedTitle"
+                    value={wiTitle}
+                  />
+                  <input
+                    type="hidden"
+                    name="whatsIncludedItems"
+                    value={JSON.stringify(wiItems)}
+                  />
+                </div>
+
+                {/* Live preview */}
+                <div>
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-subtle">
+                    Preview
+                  </p>
+                  <div className="rounded-2xl border border-border bg-surface p-5">
+                    <p className="mb-3 text-sm font-semibold">
+                      {wiTitle || "What's included"}
+                    </p>
+                    <ul className="space-y-2.5">
+                      {wiItems
+                        .filter((it) => it.text)
+                        .map((item, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-start gap-2.5 text-sm text-muted"
+                          >
+                            <span className="mt-px text-base leading-none">
+                              {item.icon || "•"}
+                            </span>
+                            <span>{item.text}</span>
+                          </li>
+                        ))}
+                      {wiItems.filter((it) => it.text).length === 0 && (
+                        <li className="text-xs italic text-subtle">
+                          No items yet.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex items-center gap-4">
+                <button
+                  type="submit"
+                  disabled={wiPending}
+                  className="flex items-center gap-2 rounded-full bg-brand-ink px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 transition cursor-pointer"
+                >
+                  {wiPending && <Spinner className="h-3.5 w-3.5" />}
+                  {wiPending ? "Saving…" : "Save card"}
+                </button>
+                {wiState?.formError && (
+                  <Alert variant="error">{wiState.formError}</Alert>
+                )}
+                {wiState?.success && (
+                  <Alert variant="success">Card saved.</Alert>
+                )}
+              </div>
+            </form>
+          )}
         </div>
-      </form>
+      </div>
     </div>
   );
 }

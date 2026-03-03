@@ -726,7 +726,6 @@ export default function ProductEditorForm({
                     fill
                     sizes="(max-width: 768px) 100vw, 800px"
                     className="object-cover"
-                    unoptimized
                   />
                 </div>
                 {/* Replace overlay on hover */}
@@ -906,7 +905,6 @@ export default function ProductEditorForm({
                       fill
                       sizes="(max-width: 768px) 50vw, 260px"
                       className="object-cover"
-                      unoptimized
                     />
                   </div>
                   <div className="absolute inset-x-0 bottom-0 p-2 bg-linear-to-t from-black/70 to-transparent text-white">
@@ -943,7 +941,6 @@ export default function ProductEditorForm({
                       alt=""
                       fill
                       className="object-cover"
-                      unoptimized
                     />
                   </div>
 

@@ -6,7 +6,7 @@ import { SITE } from "@/lib/site";
 import { buildMetadata } from "@/lib/seo";
 import JsonLd from "@/components/seo/JsonLd";
 import { getPublishedProductBySlug } from "@/lib/db/products";
-import { presignViewUrls, buildViewUrlMap } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import { connection } from "next/server";
 import Breadcrumb from "@/components/shared/Breadcrumb";
 import ProductSectionTabs from "@/components/products/ProductSectionTabs";
@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: PageProps) {
   if (!product) notFound();
 
   const allKeys = [product.image, ...(product.gallery ?? [])].filter(Boolean);
-  const viewMap = buildViewUrlMap(await presignViewUrls(allKeys));
+  const viewMap = Object.fromEntries(allKeys.map((k) => [k, getPublicUrl(k)]));
 
   const heroSrc = product.image ? (viewMap[product.image] ?? "") : "";
   const gallerySrcs = (product.gallery ?? [])
@@ -179,7 +179,6 @@ export default async function ProductPage({ params }: PageProps) {
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                       className="object-cover transition duration-500 group-hover:scale-[1.04]"
-                      unoptimized
                     />
                   </div>
                 </div>
@@ -242,7 +241,6 @@ function HeroImage({ title, src }: { title: string; src: string }) {
           priority
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="object-cover"
-          unoptimized
         />
       </div>
     </div>

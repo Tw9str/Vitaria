@@ -30,14 +30,14 @@ export default function ProductSectionTabs({
               type="button"
               onClick={() => setActive(i)}
               className={[
-                "relative shrink-0 px-4 pb-3 pt-1 text-sm font-semibold transition-colors",
+                "relative shrink-0 px-4 pb-3 pt-1 text-sm font-semibold transition-colors cursor-pointer",
                 i === active ? "text-text" : "text-subtle hover:text-muted",
               ].join(" ")}
             >
               {sec.heading || `Section ${i + 1}`}
               {/* Active indicator */}
               {i === active && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full bg-brand-leaf" />
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-brand-leaf" />
               )}
             </button>
           ))}

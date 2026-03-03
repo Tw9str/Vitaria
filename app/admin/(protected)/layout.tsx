@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prismaClient";
-import { presignViewUrls } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import AdminShell from "@/components/admin/AdminShell";
 
 export default async function ProtectedAdminLayout({
@@ -20,11 +20,7 @@ export default async function ProtectedAdminLayout({
       })
     : null;
 
-  let imageViewUrl: string | null = null;
-  if (dbUser?.image) {
-    const [signed] = await presignViewUrls([dbUser.image]).catch(() => []);
-    imageViewUrl = signed?.viewUrl ?? null;
-  }
+  const imageViewUrl = dbUser?.image ? getPublicUrl(dbUser.image) : null;
 
   return (
     <AdminShell

@@ -13,6 +13,7 @@ export const config = {
     accessKeyId: env("R2_ACCESS_KEY_ID"),
     secretAccessKey: env("R2_SECRET_ACCESS_KEY"),
     bucket: env("R2_BUCKET"),
+    publicUrl: env("NEXT_PUBLIC_R2_PUBLIC_URL"),
   },
 
   turnstile: {

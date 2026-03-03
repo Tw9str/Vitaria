@@ -3,7 +3,7 @@ import { getOverviewData } from "@/lib/db/overview";
 import type { OverviewData } from "@/lib/db/overview";
 import { getNotes, type NoteItem } from "@/lib/db/notes";
 import { getRecentLogs, type LogEntry } from "@/lib/db/logs";
-import { presignViewUrls } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import StatCards from "@/components/admin/overview/StatCards";
 import RecentLeads from "@/components/admin/overview/RecentLeads";
 import LeadsSparkline from "@/components/admin/overview/LeadsSparkline";
@@ -27,27 +27,16 @@ export default async function AdminOverview() {
       getRecentLogs(8),
     ]);
 
-    // Presign user avatar keys for note authors + activity actors
+    // Build public URL maps for note author + activity actor avatars
     const noteAvatarKeys = notes
       .map((n) => n.author?.image)
       .filter(Boolean) as string[];
     const activityAvatarKeys = recentLogs
       .map((l) => l.actor?.image)
       .filter(Boolean) as string[];
-    const allAvatarKeys = [
-      ...new Set([...noteAvatarKeys, ...activityAvatarKeys]),
-    ];
-    if (allAvatarKeys.length) {
-      const signed = await presignViewUrls(allAvatarKeys).catch(() => []);
-      const combined: Record<string, string> = {};
-      for (const { key, viewUrl } of signed) {
-        if (viewUrl) combined[key] = viewUrl;
-      }
-      for (const k of noteAvatarKeys)
-        if (combined[k]) noteImageUrlMap[k] = combined[k];
-      for (const k of activityAvatarKeys)
-        if (combined[k]) activityImageUrlMap[k] = combined[k];
-    }
+    for (const k of noteAvatarKeys) noteImageUrlMap[k] = getPublicUrl(k);
+    for (const k of activityAvatarKeys)
+      activityImageUrlMap[k] = getPublicUrl(k);
   } catch (err) {
     console.error("[AdminOverview] failed to load:", err);
   }

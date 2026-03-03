@@ -7,6 +7,7 @@ import { fetchLeadsAction, type LeadRow } from "@/app/actions/lead";
 import { LEAD_STATUSES } from "@/lib/leads";
 import Spinner from "@/components/shared/Spinner";
 import DropdownSelect, { type DropdownOption } from "./DropdownSelect";
+import { getPublicUrl } from "@/lib/site";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
@@ -309,7 +310,7 @@ export default function LeadsListClient({
                 <div className="mt-1.5 flex items-center gap-1.5">
                   {l.notesUpdatedBy.image ? (
                     <img
-                      src={l.notesUpdatedBy.image}
+                      src={getPublicUrl(l.notesUpdatedBy.image)}
                       alt=""
                       className="h-4 w-4 rounded-full object-cover shrink-0"
                     />

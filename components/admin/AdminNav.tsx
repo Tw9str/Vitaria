@@ -82,6 +82,32 @@ const nav: {
     ),
   },
   {
+    label: "Hero",
+    href: "/admin/hero",
+    exact: false,
+    adminOnly: true,
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <rect x="3" y="3" width="18" height="14" rx="2" />
+        <path d="M3 9h18" />
+        <circle cx="8" cy="6" r="1" />
+        <circle cx="12" cy="6" r="1" />
+        <circle cx="16" cy="6" r="1" />
+      </svg>
+    ),
+  },
+  {
     label: "Contact",
     href: "/admin/contact",
     exact: false,
@@ -168,7 +194,9 @@ export default function AdminNav({
   return (
     <nav className="space-y-0.5 text-sm">
       {nav
-        .filter((item) => !item.adminOnly || role === "admin")
+        .filter(
+          (item) => !item.adminOnly || role === "admin" || role === "owner",
+        )
         .map(({ label, href, exact, icon }) => {
           const active = exact ? pathname === href : pathname.startsWith(href);
           return (

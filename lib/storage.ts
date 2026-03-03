@@ -5,13 +5,10 @@
  * Import these in Server Actions or Route Handlers only — never in Client Components.
  */
 
-import {
-  GetObjectCommand,
-  PutObjectCommand,
-  DeleteObjectsCommand,
-} from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { r2, R2_BUCKET } from "@/lib/r2Client";
+import { getPublicUrl } from "@/lib/site";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -19,7 +16,6 @@ import { r2, R2_BUCKET } from "@/lib/r2Client";
 
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
-const VIEW_URL_TTL = 60 * 60; // 1 hour — safe because product pages are dynamic (per-request)
 const UPLOAD_URL_TTL = 60; // 1 min
 
 // ---------------------------------------------------------------------------
@@ -35,14 +31,8 @@ export type FileDescriptor = {
 export type PresignedUpload = {
   key: string;
   uploadUrl: string;
+  /** Permanent public URL (bucket is public). */
   viewUrl: string;
-  expiresIn: number;
-};
-
-export type PresignedView = {
-  key: string;
-  viewUrl: string;
-  expiresIn: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -82,24 +72,17 @@ export async function presignProductImageUploads(
         const safe = sanitizeFilename(file.filename);
         const key = `products/${productId}/${crypto.randomUUID()}-${safe}`;
 
-        const [uploadUrl, viewUrl] = await Promise.all([
-          getSignedUrl(
-            r2,
-            new PutObjectCommand({
-              Bucket: R2_BUCKET,
-              Key: key,
-              ContentType: file.contentType,
-            }),
-            { expiresIn: UPLOAD_URL_TTL },
-          ),
-          getSignedUrl(
-            r2,
-            new GetObjectCommand({ Bucket: R2_BUCKET, Key: key }),
-            { expiresIn: VIEW_URL_TTL },
-          ),
-        ]);
+        const uploadUrl = await getSignedUrl(
+          r2,
+          new PutObjectCommand({
+            Bucket: R2_BUCKET,
+            Key: key,
+            ContentType: file.contentType,
+          }),
+          { expiresIn: UPLOAD_URL_TTL },
+        );
 
-        return { key, uploadUrl, viewUrl, expiresIn: VIEW_URL_TTL };
+        return { key, uploadUrl, viewUrl: getPublicUrl(key) };
       }),
     );
   } catch (cause) {
@@ -111,41 +94,6 @@ export async function presignProductImageUploads(
       cause,
     });
   }
-}
-
-/**
- * Generate presigned view URLs for an array of existing R2 keys.
- * Skips empty keys silently.
- */
-export async function presignViewUrls(
-  keys: string[],
-): Promise<PresignedView[]> {
-  const validKeys = keys.filter(Boolean);
-  if (!validKeys.length) return [];
-
-  try {
-    return await Promise.all(
-      validKeys.map(async (key) => {
-        const viewUrl = await getSignedUrl(
-          r2,
-          new GetObjectCommand({ Bucket: R2_BUCKET, Key: key }),
-          { expiresIn: VIEW_URL_TTL },
-        );
-        return { key, viewUrl, expiresIn: VIEW_URL_TTL };
-      }),
-    );
-  } catch (cause) {
-    throw new Error("Failed to generate view URLs. Check R2 credentials.", {
-      cause,
-    });
-  }
-}
-
-/** Build a lookup map from key → viewUrl. */
-export function buildViewUrlMap(
-  signed: PresignedView[],
-): Record<string, string> {
-  return Object.fromEntries(signed.map((r) => [r.key, r.viewUrl]));
 }
 
 /**
@@ -183,8 +131,34 @@ export async function presignAvatarUpload(
   const safe = sanitizeFilename(file.filename);
   const key = `avatars/${userId}/${crypto.randomUUID()}-${safe}`;
 
-  const [uploadUrl, viewUrl] = await Promise.all([
-    getSignedUrl(
+  const uploadUrl = await getSignedUrl(
+    r2,
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      ContentType: file.contentType,
+    }),
+    { expiresIn: UPLOAD_URL_TTL },
+  );
+
+  return { key, uploadUrl, viewUrl: getPublicUrl(key) };
+}
+
+/**
+ * Generate a presigned upload + view URL for a hero slide image.
+ * Stored at hero/<slideId>/<uuid>-<filename>.
+ */
+export async function presignHeroImageUpload(
+  slideId: string,
+  file: FileDescriptor,
+): Promise<PresignedUpload> {
+  validateImageFile(file);
+
+  const safe = sanitizeFilename(file.filename);
+  const key = `hero/${slideId}/${crypto.randomUUID()}-${safe}`;
+
+  try {
+    const uploadUrl = await getSignedUrl(
       r2,
       new PutObjectCommand({
         Bucket: R2_BUCKET,
@@ -192,13 +166,18 @@ export async function presignAvatarUpload(
         ContentType: file.contentType,
       }),
       { expiresIn: UPLOAD_URL_TTL },
-    ),
-    getSignedUrl(r2, new GetObjectCommand({ Bucket: R2_BUCKET, Key: key }), {
-      expiresIn: VIEW_URL_TTL,
-    }),
-  ]);
-
-  return { key, uploadUrl, viewUrl, expiresIn: VIEW_URL_TTL };
+    );
+    return { key, uploadUrl, viewUrl: getPublicUrl(key) };
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.includes("allowed"))
+      throw cause;
+    if (cause instanceof Error && cause.message.includes("exceeds"))
+      throw cause;
+    throw new Error(
+      "Failed to generate hero upload URL. Check R2 credentials.",
+      { cause },
+    );
+  }
 }
 
 /**

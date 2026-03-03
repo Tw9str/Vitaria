@@ -3,58 +3,70 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import type { HeroSlide } from "@/lib/db/siteConfig";
+import { getPublicUrl } from "@/lib/site";
 
-// ─── types & data ─────────────────────────────────────────────────────────────
+// ─── fallback data ────────────────────────────────────────────────────────────
 
-type Slide = {
-  image: string;
-  title: string;
-  subtitle: string;
-  ctaText: string;
-  ctaHref: string;
-};
-
-const SLIDES: Slide[] = [
+const FALLBACK_SLIDES: HeroSlide[] = [
   {
+    id: "slide-1",
     image: "/images/hero/slide-1.jpg",
     title: "Premium Wholesale Products",
     subtitle: "Designed for retailers. Built for repeat customers.",
     ctaText: "Request Wholesale Catalog",
     ctaHref: "#contact",
+    cta2Text: "View products",
+    cta2Href: "/products",
+    cta2Visible: true,
   },
   {
+    id: "slide-2",
     image: "/images/hero/slide-2.jpg",
     title: "Retail-Ready Collections",
     subtitle: "High-margin product lines for modern stores.",
     ctaText: "View Products",
-    ctaHref: "#products",
+    ctaHref: "/products",
+    cta2Text: "Get in touch",
+    cta2Href: "#contact",
+    cta2Visible: true,
   },
   {
+    id: "slide-3",
     image: "/images/hero/slide-3.jpg",
     title: "Trusted Wholesale Partner",
     subtitle: "Reliable supply, consistent quality, strong branding.",
     ctaText: "Wholesale Details",
     ctaHref: "#wholesale",
+    cta2Text: "View products",
+    cta2Href: "/products",
+    cta2Visible: true,
   },
 ];
-
-const SLIDE_COUNT = SLIDES.length;
 
 // ─── component ────────────────────────────────────────────────────────────────
 
 type HeroSliderProps = {
+  slides?: HeroSlide[];
+  autoplay?: boolean;
   interval?: number;
   swipeThreshold?: number;
 };
 
 export default function HeroSlider({
+  slides: slidesProp,
+  autoplay = true,
   interval = 5000,
   swipeThreshold = 40,
 }: HeroSliderProps) {
+  const activeSlides = slidesProp?.length ? slidesProp : FALLBACK_SLIDES;
+  const slideCount = activeSlides.length;
+
   const [active, setActive] = useState(0);
   const [announce, setAnnounce] = useState("");
 
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoplayAllowed = useRef(autoplay);
   const pausedRef = useRef(false);
   const touchStartX = useRef<number | null>(null);
 
@@ -69,16 +81,16 @@ export default function HeroSlider({
 
   function startTick() {
     clearTick();
-    if (!pausedRef.current) {
+    if (!pausedRef.current && autoplayAllowed.current) {
       tickRef.current = setInterval(
-        () => setActive((v) => (v + 1) % SLIDE_COUNT),
+        () => setActive((v) => (v + 1) % slideCount),
         interval,
       );
     }
   }
 
   function goTo(i: number) {
-    setActive(((i % SLIDE_COUNT) + SLIDE_COUNT) % SLIDE_COUNT);
+    setActive(((i % slideCount) + slideCount) % slideCount);
     startTick();
   }
 
@@ -96,8 +108,9 @@ export default function HeroSlider({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    setAnnounce(`${SLIDES[active].title}: ${SLIDES[active].subtitle}`);
-  }, [active]);
+    const s = activeSlides[active];
+    if (s) setAnnounce(`${s.title}: ${s.subtitle}`);
+  }, [active, activeSlides]);
 
   // ── handlers ─────────────────────────────────────────────────────────────────
 
@@ -167,21 +180,22 @@ export default function HeroSlider({
         {announce}
       </div>
 
-      {SLIDES.map((slide, i) => {
+      {activeSlides.map((slide, i) => {
         const isActive = i === active;
         const preload =
           i === active ||
-          i === (active + 1) % SLIDE_COUNT ||
-          i === (active - 1 + SLIDE_COUNT) % SLIDE_COUNT;
+          i === (active + 1) % slideCount ||
+          i === (active - 1 + slideCount) % slideCount;
+        const imgSrc = getPublicUrl(slide.image);
         return (
           <div
-            key={slide.image}
+            key={slide.id}
             aria-hidden={!isActive}
             className="absolute inset-0 transition-opacity duration-700 ease-in-out"
             style={{ opacity: isActive ? 1 : 0, zIndex: isActive ? 2 : 1 }}
           >
             <Image
-              src={slide.image}
+              src={imgSrc}
               alt={slide.title}
               fill
               priority={preload}
@@ -203,13 +217,15 @@ export default function HeroSlider({
                   >
                     {slide.ctaText}
                   </Link>
-                  <Link
-                    href="#products"
-                    tabIndex={isActive ? undefined : -1}
-                    className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 font-semibold text-white/90 transition hover:bg-white/10"
-                  >
-                    View product lines
-                  </Link>
+                  {(slide.cta2Visible ?? true) && (
+                    <Link
+                      href={slide.cta2Href || "#products"}
+                      tabIndex={isActive ? undefined : -1}
+                      className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-6 py-3 font-semibold text-white/90 transition hover:bg-white/10"
+                    >
+                      {slide.cta2Text || "View product lines"}
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
@@ -234,9 +250,9 @@ export default function HeroSlider({
       </button>
 
       <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2.5">
-        {SLIDES.map((slide, i) => (
+        {activeSlides.map((slide, i) => (
           <button
-            key={slide.image}
+            key={slide.id}
             onClick={() => goTo(i)}
             aria-label={`Go to slide ${i + 1}: ${slide.title}`}
             aria-current={i === active ? "true" : undefined}

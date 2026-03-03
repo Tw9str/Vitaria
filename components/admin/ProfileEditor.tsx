@@ -262,13 +262,15 @@ export default function ProfileEditor({
           </div>
 
           <span
-            className={`ml-auto rounded-full px-3 py-1 text-xs font-semibold ${
-              role === "admin"
-                ? "bg-gold/15 text-gold"
-                : "bg-black/10 text-muted"
+            className={`ml-auto rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+              role === "owner"
+                ? "bg-gold/20 text-gold"
+                : role === "admin"
+                  ? "bg-blue-500/15 text-blue-400"
+                  : "bg-purple-500/15 text-purple-400"
             }`}
           >
-            {role.charAt(0).toUpperCase() + role.slice(1)}
+            {role}
           </span>
         </div>
 

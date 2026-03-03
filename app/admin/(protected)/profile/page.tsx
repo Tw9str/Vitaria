@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prismaClient";
-import { presignViewUrls } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import ProfileEditor from "@/components/admin/ProfileEditor";
 
 export default async function Profile() {
@@ -21,12 +21,8 @@ export default async function Profile() {
       })
     : null;
 
-  // Presign a view URL for the stored R2 avatar key (if any)
-  let imageViewUrl: string | null = null;
-  if (user?.image) {
-    const [signed] = await presignViewUrls([user.image]).catch(() => []);
-    imageViewUrl = signed?.viewUrl ?? null;
-  }
+  // Build public URL for the stored R2 avatar key (if any)
+  const imageViewUrl = user?.image ? getPublicUrl(user.image) : null;
 
   return (
     <ProfileEditor

@@ -1,5 +1,5 @@
 import { getLogs, type LogEntry } from "@/lib/db/logs";
-import { presignViewUrls } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import LogsListClient from "@/components/admin/logs/LogsListClient";
 
 export const metadata = { title: "Activity Logs · Admin" };
@@ -14,16 +14,11 @@ export default async function LogsPage() {
     initialLogs = result.logs;
     initialHasMore = result.hasMore;
 
-    // Presign actor avatar keys
+    // Build public avatar URL map for actors
     const avatarKeys = initialLogs
       .map((l) => l.actor?.image)
       .filter(Boolean) as string[];
-    if (avatarKeys.length) {
-      const signed = await presignViewUrls(avatarKeys).catch(() => []);
-      for (const { key, viewUrl } of signed) {
-        if (viewUrl) initialImageUrlMap[key] = viewUrl;
-      }
-    }
+    for (const key of avatarKeys) initialImageUrlMap[key] = getPublicUrl(key);
   } catch (err) {
     console.error("[LogsPage] failed to load:", err);
   }
@@ -42,13 +37,9 @@ export default async function LogsPage() {
     const avatarKeys = result.logs
       .map((l) => l.actor?.image)
       .filter(Boolean) as string[];
-    let imageUrlMap: Record<string, string> = {};
-    if (avatarKeys.length) {
-      const signed = await presignViewUrls(avatarKeys).catch(() => []);
-      for (const { key, viewUrl } of signed) {
-        if (viewUrl) imageUrlMap[key] = viewUrl;
-      }
-    }
+    const imageUrlMap = Object.fromEntries(
+      avatarKeys.map((k) => [k, getPublicUrl(k)]),
+    );
     return { ...result, imageUrlMap };
   }
 

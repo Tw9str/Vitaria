@@ -6,7 +6,7 @@ import { connection } from "next/server";
 import { SITE } from "@/lib/site";
 import { buildMetadata } from "@/lib/seo";
 import { getPublishedProducts } from "@/lib/db/products";
-import { presignViewUrls, buildViewUrlMap } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import ProductFilterBar from "@/components/products/ProductFilterBar";
 import EmptyState from "@/components/shared/EmptyState";
 import Breadcrumb from "@/components/shared/Breadcrumb";
@@ -37,7 +37,7 @@ export default async function ProductsPage({
   try {
     products = await getPublishedProducts();
     const imageKeys = products.map((p) => p.image).filter(Boolean);
-    viewMap = buildViewUrlMap(await presignViewUrls(imageKeys));
+    viewMap = Object.fromEntries(imageKeys.map((k) => [k, getPublicUrl(k)]));
   } catch (err) {
     console.error("[ProductsPage] failed to load:", err);
     return (
@@ -141,7 +141,6 @@ export default async function ProductsPage({
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                           className="object-cover transition group-hover:scale-[1.02]"
-                          unoptimized
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center bg-black/10">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import EditButton from "@/components/admin/EditButton";
 import Image from "next/image";
 import { getAllProducts } from "@/lib/db/products";
-import { presignViewUrls } from "@/lib/storage";
+import { getPublicUrl } from "@/lib/site";
 import EmptyState from "@/components/shared/EmptyState";
 import ProductCardActions from "@/components/admin/ProductCardActions";
 
@@ -19,9 +19,7 @@ export default async function AdminProducts() {
       .map((p) => p.createdBy?.image)
       .filter(Boolean) as string[];
     const allKeys = [...new Set([...heroKeys, ...avatarKeys])];
-
-    const signed = await presignViewUrls(allKeys).catch(() => []);
-    urlMap = Object.fromEntries(signed.map((s) => [s.key, s.viewUrl]));
+    urlMap = Object.fromEntries(allKeys.map((k) => [k, getPublicUrl(k)]));
   } catch (err) {
     console.error("[AdminProducts] failed to load:", err);
   }
@@ -84,7 +82,6 @@ export default async function AdminProducts() {
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                         className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                        unoptimized
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center text-muted/30">

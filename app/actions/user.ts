@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prismaClient";
-import { requireAdmin } from "@/lib/rbac";
+import { requireAdmin, requireOwner, hasRole } from "@/lib/rbac";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
@@ -39,7 +39,7 @@ const createUserSchema = z.object({
     .string()
     .min(1, "Name is required.")
     .max(120, "Name must be 120 characters or fewer."),
-  role: z.enum(["admin", "editor"]).default("editor"),
+  role: z.enum(["owner", "admin", "editor"]).default("editor"),
 });
 
 export async function createUserAction(
@@ -153,12 +153,25 @@ export async function updateUserRoleAction(
   role: Role,
 ): Promise<{ error?: string }> {
   const session = await getAdminSession();
+  const actorRole = session.role as Role;
+
+  // Only owner can assign or demote to/from owner
+  if (role === "owner" && !hasRole(actorRole, "owner")) {
+    return { error: "Only an owner can assign the owner role." };
+  }
+
+  // Fetch target to check their current role
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, role: true },
+  });
+
+  // Prevent demoting an owner unless actor is also owner
+  if (user?.role === "owner" && !hasRole(actorRole, "owner")) {
+    return { error: "Only an owner can change another owner's role." };
+  }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    });
     await prisma.user.update({
       where: { id: userId },
       data: { role },
@@ -190,15 +203,23 @@ export async function toggleBlockUserAction(
   blocked: boolean,
 ): Promise<{ error?: string }> {
   const session = await getAdminSession();
+  const actorRole = session.role as Role;
 
   // Prevent self-block
   const selfEmail = session.user?.email ?? "";
   const target = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true },
+    select: { email: true, name: true, role: true },
   });
   if (target?.email && target.email === selfEmail) {
     return { error: "You cannot block your own account." };
+  }
+
+  // Only owner can block admins or owners
+  if (target?.role === "admin" || target?.role === "owner") {
+    if (!hasRole(actorRole, "owner")) {
+      return { error: "Only an owner can block admin or owner accounts." };
+    }
   }
 
   try {
@@ -239,15 +260,23 @@ export async function deleteUserAction(
   userId: string,
 ): Promise<{ error?: string }> {
   const session = await getAdminSession();
+  const actorRole = session.role as Role;
 
   // Prevent self-deletion
   const selfEmail = session.user?.email ?? "";
   const target = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true },
+    select: { email: true, name: true, role: true },
   });
   if (target?.email && target.email === selfEmail) {
     return { error: "You cannot delete your own account." };
+  }
+
+  // Only owner can delete admins or owners
+  if (target?.role === "admin" || target?.role === "owner") {
+    if (!hasRole(actorRole, "owner")) {
+      return { error: "Only an owner can delete admin or owner accounts." };
+    }
   }
 
   try {

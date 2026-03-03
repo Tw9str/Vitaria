@@ -15,45 +15,87 @@ import { useToast } from "@/components/shared/Toaster";
 import Spinner from "@/components/shared/Spinner";
 
 const ROLE_OPTIONS: DropdownOption[] = [
-  { value: "editor", label: "Editor", dotClass: "bg-subtle" },
-  { value: "admin", label: "Admin", dotClass: "bg-gold" },
+  { value: "owner", label: "Owner", dotClass: "bg-gold" },
+  { value: "admin", label: "Admin", dotClass: "bg-blue-400" },
+  { value: "editor", label: "Editor", dotClass: "bg-purple-400" },
 ];
 
 // ---------------------------------------------------------------------------
 // Role select cell
 // ---------------------------------------------------------------------------
 
+const ROLE_BADGE: Record<string, { dot: string; text: string; bg: string }> = {
+  owner: { dot: "bg-gold", text: "text-gold", bg: "bg-gold/15" },
+  admin: { dot: "bg-blue-400", text: "text-blue-400", bg: "bg-blue-500/15" },
+  editor: {
+    dot: "bg-purple-400",
+    text: "text-purple-400",
+    bg: "bg-purple-500/15",
+  },
+};
+
+function RoleBadge({ role }: { role: string }) {
+  const s = ROLE_BADGE[role] ?? {
+    dot: "bg-subtle",
+    text: "text-muted",
+    bg: "bg-black/10",
+  };
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-sm capitalize ${s.bg} ${s.text}`}
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${s.dot}`} />
+      {role}
+    </span>
+  );
+}
+
 function RoleSelect({
   userId,
   currentRole,
   isSelf,
+  selfRole,
 }: {
   userId: string;
   currentRole: string;
   isSelf: boolean;
+  selfRole: string;
 }) {
   const [role, setRole] = useState(currentRole);
   const [isPending, startTransition] = useTransition();
+
+  // Non-owners cannot assign owner, but always keep the current role visible for display
+  const options =
+    selfRole === "owner"
+      ? ROLE_OPTIONS
+      : ROLE_OPTIONS.filter(
+          (o) => o.value !== "owner" || o.value === currentRole,
+        );
 
   function handleChange(next: string) {
     const prev = role;
     setRole(next);
     startTransition(async () => {
       try {
-        await updateUserRoleAction(userId, next as "admin" | "editor");
+        await updateUserRoleAction(
+          userId,
+          next as "owner" | "admin" | "editor",
+        );
       } catch {
         setRole(prev);
       }
     });
   }
 
+  if (isSelf) return <RoleBadge role={role} />;
+
   return (
     <DropdownSelect
       value={role}
-      options={ROLE_OPTIONS}
+      options={options}
       onChange={handleChange}
       isPending={isPending}
-      disabled={isSelf}
+      disabled={false}
       ariaLabel="User role"
     />
   );
@@ -184,13 +226,18 @@ function DeleteButton({ userId, isSelf }: { userId: string; isSelf: boolean }) {
 // Add user form
 // ---------------------------------------------------------------------------
 
-function AddUserForm() {
+function AddUserForm({ selfRole }: { selfRole: string }) {
   const [state, action, isPending] = useActionState<CreateUserState, FormData>(
     createUserAction,
     null,
   );
   const [role, setRole] = useState("editor");
   const toast = useToast();
+
+  const roleOptions =
+    selfRole === "owner"
+      ? ROLE_OPTIONS
+      : ROLE_OPTIONS.filter((o) => o.value !== "owner");
 
   useEffect(() => {
     if (state?.success) {
@@ -267,7 +314,7 @@ function AddUserForm() {
           <input type="hidden" name="role" value={role} />
           <DropdownSelect
             value={role}
-            options={ROLE_OPTIONS}
+            options={roleOptions}
             onChange={setRole}
             ariaLabel="New user role"
           />
@@ -438,14 +485,16 @@ function NameCell({
 export default function UsersTable({
   users,
   selfEmail,
+  selfRole,
 }: {
   users: (UserRow & { imageUrl: string | null })[];
   selfEmail: string;
+  selfRole: string;
 }) {
   return (
     <div className="space-y-5">
       {/* Add user */}
-      <AddUserForm />
+      <AddUserForm selfRole={selfRole} />
 
       {/* Users list */}
       <div className="rounded-[18px] border border-border bg-surface overflow-hidden">
@@ -474,6 +523,11 @@ export default function UsersTable({
             <tbody className="divide-y divide-border">
               {users.map((user) => {
                 const isSelf = user.email === selfEmail;
+                const isOwner = selfRole === "owner";
+                // Non-owners cannot touch admins or owners (except themselves)
+                const targetIsPrivileged =
+                  user.role === "admin" || user.role === "owner";
+                const canAct = isOwner || !targetIsPrivileged;
                 return (
                   <tr key={user.id} className="group">
                     <td className="px-5 py-3.5">
@@ -489,7 +543,8 @@ export default function UsersTable({
                       <RoleSelect
                         userId={user.id}
                         currentRole={user.role}
-                        isSelf={isSelf}
+                        isSelf={isSelf || !canAct}
+                        selfRole={selfRole}
                       />
                     </td>
                     <td className="hidden px-5 py-3.5 text-xs text-muted sm:table-cell">
@@ -504,9 +559,12 @@ export default function UsersTable({
                         <BlockButton
                           userId={user.id}
                           blocked={user.blocked}
-                          isSelf={isSelf}
+                          isSelf={isSelf || !canAct}
                         />
-                        <DeleteButton userId={user.id} isSelf={isSelf} />
+                        <DeleteButton
+                          userId={user.id}
+                          isSelf={isSelf || !canAct}
+                        />
                       </div>
                     </td>
                   </tr>

@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prismaClient";
 import {
   presignProductImageUploads as _presignUploads,
   presignAvatarUpload as _presignAvatar,
-  presignViewUrls as _presignViews,
   deleteStorageKeys as _deleteKeys,
   type FileDescriptor,
 } from "@/lib/storage";
@@ -25,16 +24,6 @@ export async function presignProductImageUploads(input: {
 }
 
 /**
- * Server Action: generate presigned view URLs for existing R2 keys.
- * Called from any client component that needs to display stored images.
- */
-export async function presignViewUrls(input: { keys: string[] }) {
-  const session = await auth();
-  requireAdmin(session?.role);
-  return _presignViews(input.keys);
-}
-
-/**
  * Server Action: generate a presigned upload URL for the current user's avatar.
  * Auth-gated — always uses the session user's ID as the storage path.
  */
@@ -49,6 +38,19 @@ export async function presignAvatarUploadAction(file: FileDescriptor) {
   if (!user) throw new Error("User not found.");
 
   return _presignAvatar(user.id, file);
+}
+
+/**
+ * Server Action: generate a presigned upload + view URL for a hero slide image.
+ */
+export async function presignHeroImageUploadAction(
+  slideId: string,
+  file: FileDescriptor,
+) {
+  const session = await auth();
+  requireAdmin(session?.role);
+  const { presignHeroImageUpload } = await import("@/lib/storage");
+  return presignHeroImageUpload(slideId, file);
 }
 
 /**

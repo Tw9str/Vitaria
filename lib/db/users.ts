@@ -5,7 +5,7 @@ export type UserRow = {
   name: string | null;
   email: string | null;
   image: string | null;
-  role: "admin" | "editor";
+  role: "owner" | "admin" | "editor";
   blocked: boolean;
   createdAt: Date;
 };

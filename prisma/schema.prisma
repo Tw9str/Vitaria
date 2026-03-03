@@ -8,6 +8,7 @@ datasource db {
 }
 
 enum Role {
+  owner
   admin
   editor
 }
@@ -151,6 +152,9 @@ model SiteConfig {
   linkedin           ContactChannel?
   whatsIncludedTitle String?
   whatsIncludedItems Json?
+  heroSlides         Json?
+  heroAutoplay       Boolean?
+  heroInterval       Int?
   updatedAt          DateTime        @updatedAt
 }
 

@@ -6,8 +6,11 @@ import WholesaleDetails from "@/components/sections/WholesaleDetails";
 import Contact from "@/components/sections/Contact";
 import JsonLd from "@/components/seo/JsonLd";
 import { breadcrumbsJsonLd } from "@/lib/jsonld";
+import { getSiteConfig } from "@/lib/db/siteConfig";
 
-export default function Home() {
+export default async function Home() {
+  const config = await getSiteConfig().catch(() => null);
+
   return (
     <main id="main">
       <JsonLd
@@ -17,7 +20,11 @@ export default function Home() {
           { name: "Wholesale", path: "/#wholesale" },
         ])}
       />
-      <HeroSlider />
+      <HeroSlider
+        slides={config?.heroSlides ?? undefined}
+        autoplay={config?.heroAutoplay ?? undefined}
+        interval={config?.heroInterval ?? undefined}
+      />
       <Suspense fallback={<ProductsSkeleton />}>
         <Products />
       </Suspense>
