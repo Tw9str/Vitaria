@@ -105,11 +105,11 @@ model Lead {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   email     String
-  company   String
+  company   String?
   website   String?
   type      String
-  region    String?
-  message   String?
+  region    String
+  message   String
   ip        String?
   userAgent String?
   referrer  String?

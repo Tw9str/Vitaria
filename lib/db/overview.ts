@@ -17,7 +17,7 @@ export type RecentLead = {
   id: string;
   name: string;
   email: string;
-  company: string;
+  company: string | null;
   type: string;
   status: string;
   createdAt: Date;

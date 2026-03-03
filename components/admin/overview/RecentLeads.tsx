@@ -74,7 +74,7 @@ export default function RecentLeads({ leads }: Props) {
                 {/* Company + type (always visible) */}
                 <div className="min-w-0 flex-1 md:flex-none">
                   <p className="truncate text-sm font-medium text-text">
-                    {lead.company}
+                    {lead.company ?? "—"}
                   </p>
                   <p className="truncate text-xs text-muted">{lead.type}</p>
                 </div>
