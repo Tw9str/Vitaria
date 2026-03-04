@@ -1,5 +1,5 @@
 import type { SiteConfigData } from "@/lib/db/siteConfig";
-import { CHANNEL_DEFS } from "@/lib/contact-channels";
+import { CHANNEL_DEFS } from "@/components/sections/contact/ContactChannels";
 import ChannelRow from "./ChannelRow";
 
 const DEFAULT_WHATS_INCLUDED = [

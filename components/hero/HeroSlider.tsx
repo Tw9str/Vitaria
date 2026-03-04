@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { HeroSlide } from "@/lib/db/siteConfig";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 
 // ─── fallback data ────────────────────────────────────────────────────────────
 

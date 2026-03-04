@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prismaClient";
+import { prisma } from "@/lib/db/prismaClient";
 
 /** Admin: most-recent leads, capped for the overview page. */
 export async function getRecentLeads(take = 50) {

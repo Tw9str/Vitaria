@@ -7,8 +7,8 @@
 
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { r2, R2_BUCKET } from "@/lib/r2Client";
-import { getPublicUrl } from "@/lib/site";
+import { r2, R2_BUCKET } from "@/lib/storage/r2Client";
+import { getPublicUrl } from "@/lib/storage/url";
 
 // ---------------------------------------------------------------------------
 // Constants

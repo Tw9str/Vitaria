@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { SITE } from "@/lib/site";
-import { buildMetadata } from "@/lib/seo";
+import { SITE } from "@/lib/core/site";
+import { buildMetadata } from "@/lib/seo/seo";
 import JsonLd from "@/components/seo/JsonLd";
-import { organizationJsonLd, websiteJsonLd } from "@/lib/jsonld";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 import ThemeBootstrap from "@/components/shared/ThemeBootsrap";
 import Footer from "@/components/shared/Footer";
 import Header from "@/components/shared/Header";

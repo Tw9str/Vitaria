@@ -5,7 +5,7 @@ import WhyVitaria from "@/components/sections/WhyVitaria";
 import WholesaleDetails from "@/components/sections/WholesaleDetails";
 import Contact from "@/components/sections/Contact";
 import JsonLd from "@/components/seo/JsonLd";
-import { breadcrumbsJsonLd } from "@/lib/jsonld";
+import { breadcrumbsJsonLd } from "@/lib/seo/jsonld";
 import { getSiteConfig } from "@/lib/db/siteConfig";
 
 export default async function Home() {

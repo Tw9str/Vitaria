@@ -1,6 +1,6 @@
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prismaClient";
-import { getPublicUrl } from "@/lib/site";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/db/prismaClient";
+import { getPublicUrl } from "@/lib/storage/url";
 import ProfileEditor from "@/components/admin/ProfileEditor";
 
 export default async function Profile() {

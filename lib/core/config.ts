@@ -1,4 +1,10 @@
-import { env } from "./env";
+// NOTE: This file only contains server secrets. Never import it in Client Components.
+
+function env(name: string): string {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v.trim();
+}
 
 export const config = {
   databaseUrl: env("DATABASE_URL"),
@@ -13,7 +19,6 @@ export const config = {
     accessKeyId: env("R2_ACCESS_KEY_ID"),
     secretAccessKey: env("R2_SECRET_ACCESS_KEY"),
     bucket: env("R2_BUCKET"),
-    publicUrl: env("NEXT_PUBLIC_R2_PUBLIC_URL"),
   },
 
   turnstile: {

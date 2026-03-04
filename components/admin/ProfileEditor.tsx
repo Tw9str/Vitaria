@@ -6,7 +6,7 @@ import {
   presignAvatarUploadAction,
   deleteStorageKeysAction,
 } from "@/app/actions/createUploadUrl";
-import { imageFileSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validators";
+import { imageFileSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation/validators";
 import Alert from "@/components/shared/Alert";
 import Spinner from "@/components/shared/Spinner";
 

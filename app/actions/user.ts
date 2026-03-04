@@ -1,13 +1,13 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prismaClient";
-import { requireAdmin, requireOwner, hasRole } from "@/lib/rbac";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/db/prismaClient";
+import { requireAdmin, requireOwner, hasRole } from "@/lib/utils/rbac";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
-import { appendLog } from "@/lib/logger";
-import { deleteStorageKeys } from "@/lib/storage";
+import { appendLog } from "@/lib/db/logger";
+import { deleteStorageKeys } from "@/lib/storage/storage";
 
 // ---------------------------------------------------------------------------
 // Helpers

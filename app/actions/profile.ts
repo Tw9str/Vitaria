@@ -1,11 +1,11 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prismaClient";
-import { profileSchema, type ProfileInput } from "@/lib/validators";
-import { deleteStorageKeys } from "@/lib/storage";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/db/prismaClient";
+import { profileSchema, type ProfileInput } from "@/lib/validation/validators";
+import { deleteStorageKeys } from "@/lib/storage/storage";
 import { revalidatePath } from "next/cache";
-import { appendLog } from "@/lib/logger";
+import { appendLog } from "@/lib/db/logger";
 
 export type ProfileFieldErrors = Partial<Record<keyof ProfileInput, string[]>>;
 

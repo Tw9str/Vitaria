@@ -12,8 +12,8 @@ import {
   presignProductImageUploads,
   deleteStorageKeysAction,
 } from "@/app/actions/createUploadUrl";
-import { imageFileSchema } from "@/lib/validators";
-import { getPublicUrl } from "@/lib/site";
+import { imageFileSchema } from "@/lib/validation/validators";
+import { getPublicUrl } from "@/lib/storage/url";
 
 // ---------------------------------------------------------------------------
 // Upload queue reducer (inlined to avoid module-resolution issues)

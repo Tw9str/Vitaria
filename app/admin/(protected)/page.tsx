@@ -1,9 +1,9 @@
-﻿import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { getOverviewData } from "@/lib/db/overview";
 import type { OverviewData } from "@/lib/db/overview";
 import { getNotes, type NoteItem } from "@/lib/db/notes";
 import { getRecentLogs, type LogEntry } from "@/lib/db/logs";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 import StatCards from "@/components/admin/overview/StatCards";
 import RecentLeads from "@/components/admin/overview/RecentLeads";
 import LeadsSparkline from "@/components/admin/overview/LeadsSparkline";

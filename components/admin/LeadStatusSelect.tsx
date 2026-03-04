@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { updateLeadStatusAction } from "@/app/actions/lead";
-import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads";
+import { LEAD_STATUSES, type LeadStatus } from "@/lib/db/leadStatus";
 import DropdownSelect, { type DropdownOption } from "./DropdownSelect";
 
 const OPTIONS: DropdownOption[] = [

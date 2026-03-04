@@ -5,7 +5,7 @@ import { useState, useTransition, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Alert from "@/components/shared/Alert";
 import Spinner from "@/components/shared/Spinner";
-import { loginSchema } from "@/lib/validators";
+import { loginSchema } from "@/lib/validation/validators";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   Verification:
@@ -47,7 +47,7 @@ function LoginForm() {
       });
 
       if (res?.error) {
-        setError(res.error);
+        setError(AUTH_ERROR_MESSAGES[res.error] ?? AUTH_ERROR_MESSAGES.Default);
         setSent(false);
         return;
       }

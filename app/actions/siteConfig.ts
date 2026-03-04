@@ -1,9 +1,9 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prismaClient";
+import { auth } from "@/lib/auth/auth";
+import { prisma } from "@/lib/db/prismaClient";
 import { revalidatePath } from "next/cache";
-import { appendLog } from "@/lib/logger";
+import { appendLog } from "@/lib/db/logger";
 
 export type SiteConfigActionState = {
   success?: boolean;

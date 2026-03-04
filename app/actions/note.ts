@@ -1,10 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
-import { requireAuth } from "@/lib/rbac";
-import { prisma } from "@/lib/prismaClient";
-import { appendLog } from "@/lib/logger";
+import { auth } from "@/lib/auth/auth";
+import { requireAuth } from "@/lib/utils/rbac";
+import { prisma } from "@/lib/db/prismaClient";
+import { appendLog } from "@/lib/db/logger";
 
 export async function createNoteAction(content: string): Promise<void> {
   const session = await auth();

@@ -1,12 +1,12 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { SITE } from "@/lib/site";
-import { buildMetadata } from "@/lib/seo";
+import { SITE } from "@/lib/core/site";
+import { buildMetadata } from "@/lib/seo/seo";
 import JsonLd from "@/components/seo/JsonLd";
 import { getPublishedProductBySlug } from "@/lib/db/products";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 import { connection } from "next/server";
 import Breadcrumb from "@/components/shared/Breadcrumb";
 import ProductSectionTabs from "@/components/products/ProductSectionTabs";

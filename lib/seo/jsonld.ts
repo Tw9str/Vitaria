@@ -1,4 +1,4 @@
-import { SITE } from "./site";
+import { SITE } from "@/lib/core/site";
 
 const SCHEMA_CONTEXT = "https://schema.org" as const;
 

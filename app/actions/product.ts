@@ -1,13 +1,13 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { requireRole, requireAuth } from "@/lib/rbac";
-import { prisma } from "@/lib/prismaClient";
-import { productSchema, type ProductInput } from "@/lib/validators";
-import { deleteProductStorage, deleteStorageKeys } from "@/lib/storage";
+import { auth } from "@/lib/auth/auth";
+import { requireRole, requireAuth } from "@/lib/utils/rbac";
+import { prisma } from "@/lib/db/prismaClient";
+import { productSchema, type ProductInput } from "@/lib/validation/validators";
+import { deleteProductStorage, deleteStorageKeys } from "@/lib/storage/storage";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { appendLog } from "@/lib/logger";
+import { appendLog } from "@/lib/db/logger";
 
 // ---------------------------------------------------------------------------
 // Helpers

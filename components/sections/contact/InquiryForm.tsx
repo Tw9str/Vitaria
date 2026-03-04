@@ -5,8 +5,8 @@ import Link from "next/link";
 import Spinner from "@/components/shared/Spinner";
 import Alert from "@/components/shared/Alert";
 import TurnstileWidget from "@/components/shared/Turnstile";
-import { leadSchema } from "@/lib/validators";
-import type { LeadInput } from "@/lib/validators";
+import { leadSchema } from "@/lib/validation/validators";
+import type { LeadInput } from "@/lib/validation/validators";
 
 type Status = "idle" | "sending" | "sent" | "error";
 type FieldErrors = Partial<Record<keyof LeadInput, string>>;
@@ -251,7 +251,7 @@ export default function InquiryForm({
                     name="type"
                     defaultValue=""
                     className={[
-                      "w-full appearance-none rounded-lg border bg-bg/60 px-4 py-3 pr-9 text-sm text-text outline-none transition",
+                      "w-full appearance-none rounded-lg border bg-bg/85 px-4 py-3 pr-9 text-sm text-text outline-none transition",
                       fieldErrors?.type
                         ? "border-red-500/60 focus:border-red-500/80 focus:ring-3 focus:ring-red-500/10"
                         : "border-border focus:border-gold/60 focus:ring-3 focus:ring-gold/10",

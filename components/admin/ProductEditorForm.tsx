@@ -14,7 +14,7 @@ import {
   type ProductActionState,
 } from "@/app/actions/product";
 import { useToast } from "@/components/shared/Toaster";
-import { ACCEPTED_IMAGE_TYPES as ACCEPTED_TYPES } from "@/lib/validators";
+import { ACCEPTED_IMAGE_TYPES as ACCEPTED_TYPES } from "@/lib/validation/validators";
 import { Field, FieldErrors, Progress } from "./ProductFormFields";
 import { useProductImageUploads } from "./useProductImageUploads";
 

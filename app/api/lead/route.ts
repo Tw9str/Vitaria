@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prismaClient";
-import { leadSchema } from "@/lib/validators";
-import { sendEmailSafe } from "@/lib/email";
+import { prisma } from "@/lib/db/prismaClient";
+import { leadSchema } from "@/lib/validation/validators";
+import { sendEmailSafe } from "@/lib/email/email";
 import {
   buildAdminLeadNotification,
   buildLeadConfirmation,
-} from "@/lib/email-templates/lead";
-import { config } from "@/lib/config";
-import { verifyTurnstileToken } from "@/lib/turnstile";
+} from "@/lib/email/templates/lead";
+import { config } from "@/lib/core/config";
+import { verifyTurnstileToken } from "@/lib/utils/turnstile";
 
 export async function POST(req: Request) {
   try {

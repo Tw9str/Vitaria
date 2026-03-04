@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { getAllUsers } from "@/lib/db/users";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 import UsersTable from "@/components/admin/UsersTable";
 
 export const metadata = { title: "Users" };

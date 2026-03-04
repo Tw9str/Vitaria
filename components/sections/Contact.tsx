@@ -1,6 +1,9 @@
-﻿import { CHANNEL_DEFS, buildHref } from "@/lib/contact-channels";
+import {
+  CHANNEL_DEFS,
+  buildHref,
+} from "@/components/sections/contact/ContactChannels";
 import { getSiteConfig } from "@/lib/db/siteConfig";
-import { config } from "@/lib/config";
+import { config } from "@/lib/core/config";
 import InquiryForm from "./contact/InquiryForm";
 import ContactSidebar from "./contact/ContactSidebar";
 

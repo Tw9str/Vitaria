@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { buildHref, type ChannelDef } from "@/lib/contact-channels";
+import {
+  buildHref,
+  type ChannelDef,
+} from "@/components/sections/contact/ContactChannels";
 
 export default function ChannelRow({
   def,

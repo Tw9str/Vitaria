@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { getPublishedProducts } from "@/lib/db/products";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 import EmptyState from "@/components/shared/EmptyState";
 import ProductsCarousel, {
   type MarqueeCard,

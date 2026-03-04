@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { relativeTime } from "@/lib/format";
+import { relativeTime } from "@/lib/utils/format";
 import type { RecentLead } from "@/lib/db/overview";
 
 const STATUS_CLASSES: Record<string, string> = {

@@ -1,6 +1,5 @@
 import { Resend } from "resend";
-import { config } from "./config";
-import { SITE } from "./site";
+import { config } from "@/lib/core/config";
 
 // ---------------------------------------------------------------------------
 // Singleton Resend client
@@ -22,25 +21,11 @@ export type EmailPayload = {
   to: string | string[];
   subject: string;
   html: string;
-  /** Defaults to "{SITE.name} <noreply@{domain}>". */
+  /** Defaults to the configured `RESEND_FROM_EMAIL`. */
   from?: string;
   /** Reply-to address shown to the recipient. */
   replyTo?: string;
 };
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function defaultFrom(): string {
-  // try {
-  //   const domain = new URL(SITE.url).hostname.replace(/^www\./, "");
-  //   return `${SITE.name} <noreply@${domain}>`;
-  // } catch {
-  //   return `${SITE.name} <noreply@vitaria.com>`;
-  // }
-  return config.resend.fromEmail;
-}
 
 // ---------------------------------------------------------------------------
 // sendEmail — throws on Resend error
@@ -48,7 +33,7 @@ function defaultFrom(): string {
 
 export async function sendEmail(payload: EmailPayload): Promise<void> {
   const { error } = await getClient().emails.send({
-    from: payload.from ?? defaultFrom(),
+    from: payload.from ?? config.resend.fromEmail,
     to: Array.isArray(payload.to) ? payload.to : [payload.to],
     subject: payload.subject,
     html: payload.html,

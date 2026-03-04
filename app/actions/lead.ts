@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
-import { requireAuth } from "@/lib/rbac";
-import { prisma } from "@/lib/prismaClient";
-import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads";
-import { appendLog } from "@/lib/logger";
+import { auth } from "@/lib/auth/auth";
+import { requireAuth } from "@/lib/utils/rbac";
+import { prisma } from "@/lib/db/prismaClient";
+import { LEAD_STATUSES, type LeadStatus } from "@/lib/db/leadStatus";
+import { appendLog } from "@/lib/db/logger";
 
 const PAGE_SIZE = 50;
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import EditButton from "@/components/admin/EditButton";
 import Image from "next/image";
 import { getAllProducts } from "@/lib/db/products";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 import EmptyState from "@/components/shared/EmptyState";
 import ProductCardActions from "@/components/admin/ProductCardActions";
 

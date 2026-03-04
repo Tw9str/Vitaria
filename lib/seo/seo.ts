@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE } from "./site";
+import { SITE } from "@/lib/core/site";
 
 export function buildMetadata(args: {
   title: string;

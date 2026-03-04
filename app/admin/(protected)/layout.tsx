@@ -1,7 +1,7 @@
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prismaClient";
-import { getPublicUrl } from "@/lib/site";
+import { prisma } from "@/lib/db/prismaClient";
+import { getPublicUrl } from "@/lib/storage/url";
 import AdminShell from "@/components/admin/AdminShell";
 
 export default async function ProtectedAdminLayout({

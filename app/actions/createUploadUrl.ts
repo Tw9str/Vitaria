@@ -1,14 +1,14 @@
 "use server";
 
-import { auth } from "@/lib/auth";
-import { requireAdmin } from "@/lib/rbac";
-import { prisma } from "@/lib/prismaClient";
+import { auth } from "@/lib/auth/auth";
+import { requireAdmin } from "@/lib/utils/rbac";
+import { prisma } from "@/lib/db/prismaClient";
 import {
   presignProductImageUploads as _presignUploads,
   presignAvatarUpload as _presignAvatar,
   deleteStorageKeys as _deleteKeys,
   type FileDescriptor,
-} from "@/lib/storage";
+} from "@/lib/storage/storage";
 
 /**
  * Server Action: generate presigned upload + view URLs for product images.
@@ -49,7 +49,7 @@ export async function presignHeroImageUploadAction(
 ) {
   const session = await auth();
   requireAdmin(session?.role);
-  const { presignHeroImageUpload } = await import("@/lib/storage");
+  const { presignHeroImageUpload } = await import("@/lib/storage/storage");
   return presignHeroImageUpload(slideId, file);
 }
 

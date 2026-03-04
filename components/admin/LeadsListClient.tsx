@@ -4,10 +4,10 @@ import { useState, useTransition, useEffect, useRef } from "react";
 import LeadStatusSelect from "./LeadStatusSelect";
 import LeadNoteInput from "./LeadNoteInput";
 import { fetchLeadsAction, type LeadRow } from "@/app/actions/lead";
-import { LEAD_STATUSES } from "@/lib/leads";
+import { LEAD_STATUSES } from "@/lib/db/leadStatus";
 import Spinner from "@/components/shared/Spinner";
 import DropdownSelect, { type DropdownOption } from "./DropdownSelect";
-import { getPublicUrl } from "@/lib/site";
+import { getPublicUrl } from "@/lib/storage/url";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "New",
