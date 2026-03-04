@@ -22,11 +22,11 @@ const securityHeaders = [
       // Styles: Next.js injects inline styles
       "style-src 'self' 'unsafe-inline'",
       // Images: self + R2 custom domain + R2 private bucket
-      "img-src 'self' data: blob: https://chronyx.tech https://*.r2.cloudflarestorage.com",
+      "img-src 'self' data: blob: https://vitaria-images.chronyx.tech https://*.r2.cloudflarestorage.com",
       // Fonts: self
       "font-src 'self'",
       // API calls: self + Turnstile + R2 upload targets
-      "connect-src 'self' https://challenges.cloudflare.com https://chronyx.tech https://*.r2.cloudflarestorage.com",
+      "connect-src 'self' https://challenges.cloudflare.com https://vitaria-images.chronyx.tech https://*.r2.cloudflarestorage.com",
     ].join("; "),
   },
 ];
@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "chronyx.tech",
+        hostname: "vitaria-images.chronyx.tech",
       },
     ],
   },
