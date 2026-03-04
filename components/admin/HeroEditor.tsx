@@ -47,9 +47,9 @@ function makeBlankSlide(): HeroSlide {
     title: "",
     subtitle: "",
     ctaText: "",
-    ctaHref: "#contact",
-    cta2Text: "View products",
-    cta2Href: "#products",
+    ctaHref: "",
+    cta2Text: "",
+    cta2Href: "",
     cta2Visible: true,
   };
 }
@@ -745,7 +745,7 @@ export default function HeroEditor({
 
                           <div>
                             <p className="mb-1 text-xs text-muted">Link</p>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col gap-1.5">
                               <select
                                 value={
                                   isCtaPreset(selectedSlide.ctaHref)
@@ -763,7 +763,7 @@ export default function HeroEditor({
                                     });
                                   }
                                 }}
-                                className="flex-1 rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
+                                className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
                               >
                                 {CTA_PRESETS.map((p) => (
                                   <option key={p} value={p}>
@@ -782,7 +782,7 @@ export default function HeroEditor({
                                     })
                                   }
                                   placeholder="https://..."
-                                  className="flex-1 rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
+                                  className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
                                 />
                               )}
                             </div>
@@ -832,14 +832,14 @@ export default function HeroEditor({
                                   cta2Text: e.target.value,
                                 })
                               }
-                              placeholder="e.g. View product lines"
+                              placeholder="e.g. Contact"
                               className="block w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
                             />
                           </div>
 
                           <div>
                             <p className="mb-1 text-xs text-muted">Link</p>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col gap-1.5">
                               <select
                                 value={
                                   isCtaPreset(selectedSlide.cta2Href)
@@ -857,7 +857,7 @@ export default function HeroEditor({
                                     });
                                   }
                                 }}
-                                className="flex-1 rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
+                                className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
                               >
                                 {CTA_PRESETS.map((p) => (
                                   <option key={p} value={p}>
@@ -876,7 +876,7 @@ export default function HeroEditor({
                                     })
                                   }
                                   placeholder="https://..."
-                                  className="flex-1 rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
+                                  className="w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-brand-ink/40"
                                 />
                               )}
                             </div>

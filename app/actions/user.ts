@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { Role } from "@prisma/client";
 import { appendLog } from "@/lib/logger";
+import { deleteStorageKeys } from "@/lib/storage";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -266,7 +267,7 @@ export async function deleteUserAction(
   const selfEmail = session.user?.email ?? "";
   const target = await prisma.user.findUnique({
     where: { id: userId },
-    select: { email: true, name: true, role: true },
+    select: { email: true, name: true, role: true, image: true },
   });
   if (target?.email && target.email === selfEmail) {
     return { error: "You cannot delete your own account." };
@@ -280,6 +281,10 @@ export async function deleteUserAction(
   }
 
   try {
+    // Delete avatar from R2 if one exists
+    if (target?.image) {
+      await deleteStorageKeys([target.image]);
+    }
     await prisma.user.delete({ where: { id: userId } });
   } catch {
     return { error: "Failed to delete user." };
