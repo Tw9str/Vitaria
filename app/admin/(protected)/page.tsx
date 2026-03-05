@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth/auth";
 import { getOverviewData } from "@/lib/db/overview";
+
+export const metadata: Metadata = { title: "Overview · Admin" };
 import type { OverviewData } from "@/lib/db/overview";
 import { getNotes, type NoteItem } from "@/lib/db/notes";
 import { getRecentLogs, type LogEntry } from "@/lib/db/logs";

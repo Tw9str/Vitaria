@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import ThemeBootstrap from "@/components/shared/ThemeBootsrap";
 
 export const metadata: Metadata = {
-  title: "Vitaria Admin",
+  title: {
+    default: "Admin | VITARIA",
+    template: "%s | VITARIA",
+  },
   robots: { index: false, follow: false },
 };
 

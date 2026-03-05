@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prismaClient";
 import { getPublicUrl } from "@/lib/storage/url";
 import AdminShell from "@/components/admin/AdminShell";
+
+export const metadata: Metadata = {
+  title: {
+    default: "ADMIN | VITARIA",
+    template: "%s · Admin | VITARIA",
+  },
+};
 
 export default async function ProtectedAdminLayout({
   children,

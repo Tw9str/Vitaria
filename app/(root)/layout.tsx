@@ -16,6 +16,11 @@ export const metadata: Metadata = {
     image: "/images/hero/slide-1.jpg",
   }),
 
+  title: {
+    default: SITE.name,
+    template: `%s | ${SITE.name}`,
+  },
+
   referrer: "strict-origin-when-cross-origin",
 
   formatDetection: { telephone: false },

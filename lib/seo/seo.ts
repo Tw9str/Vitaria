@@ -23,7 +23,7 @@ export function buildMetadata(args: {
 
   return {
     metadataBase: new URL(SITE.url),
-    title: { default: `${SITE.name}`, template: `%s | ${SITE.name}` },
+    title,
     description,
     alternates: { canonical },
     openGraph: {

@@ -1,7 +1,7 @@
 import { getSiteConfig } from "@/lib/db/siteConfig";
 import HeroEditor from "@/components/admin/HeroEditor";
 
-export const metadata = { title: "Hero slides" };
+export const metadata = { title: "Hero Slides" };
 
 export default async function HeroPage() {
   const config = await getSiteConfig();

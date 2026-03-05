@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/db/prismaClient";
+
+export const metadata: Metadata = { title: "Profile" };
 import { getPublicUrl } from "@/lib/storage/url";
 import ProfileEditor from "@/components/admin/ProfileEditor";
 

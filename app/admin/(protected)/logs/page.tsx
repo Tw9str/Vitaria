@@ -2,7 +2,7 @@ import { getLogs, type LogEntry } from "@/lib/db/logs";
 import { getPublicUrl } from "@/lib/storage/url";
 import LogsListClient from "@/components/admin/logs/LogsListClient";
 
-export const metadata = { title: "Activity Logs · Admin" };
+export const metadata = { title: "Activity Logs" };
 
 export default async function LogsPage() {
   let initialLogs: LogEntry[] = [];

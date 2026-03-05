@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { getRecentLeads } from "@/lib/db/leads";
 import EmptyState from "@/components/shared/EmptyState";
+
+export const metadata: Metadata = { title: "Leads" };
 import LeadsListClient from "@/components/admin/LeadsListClient";
 import type { LeadRow } from "@/app/actions/lead";
 
@@ -17,7 +20,8 @@ export default async function AdminLeads() {
         <h1 className="text-xl font-semibold">Leads</h1>
         {leads.length > 0 && (
           <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-muted">
-            {leads.length}{hasMore ? "+" : ""}
+            {leads.length}
+            {hasMore ? "+" : ""}
           </span>
         )}
       </div>
