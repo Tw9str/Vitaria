@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth/auth";
-import { requireRole, requireAuth } from "@/lib/utils/rbac";
+import { requireRole, requireAuth, hasRole } from "@/lib/utils/rbac";
 import { prisma } from "@/lib/db/prismaClient";
 import { productSchema, type ProductInput } from "@/lib/validation/validators";
 import { deleteProductStorage, deleteStorageKeys } from "@/lib/storage/storage";
@@ -170,12 +170,26 @@ export async function upsertProductAction(
   }
 
   const userId = session?.user?.id ?? null;
+  const isAdmin = hasRole(session?.role, "admin");
+
+  // If an editor (non-admin) updates a published product, auto-demote to draft
+  // so an admin must re-review before it goes live again.
+  let publishedOverride: { published: false } | Record<string, never> = {};
+  if (id && !isAdmin) {
+    const current = await prisma.product.findUnique({
+      where: { id },
+      select: { published: true },
+    });
+    if (current?.published) publishedOverride = { published: false };
+  }
+
   // published is never set by the editor — new products start as draft,
-  // existing products preserve their current published state.
+  // existing products preserve their current published state (unless
+  // an editor edits a published product, which reverts it to draft).
   const saved = id
     ? await prisma.product.update({
         where: { id },
-        data: { ...data, slug: newSlug },
+        data: { ...data, slug: newSlug, ...publishedOverride },
       })
     : await prisma.product.create({
         data: { ...data, slug: newSlug, published: false, createdById: userId },
@@ -193,7 +207,7 @@ export async function upsertProductAction(
     entityId: saved.id,
     entityTitle: saved.title,
     detail: id
-      ? `Updated "${saved.title}"`
+      ? `Updated "${saved.title}"${publishedOverride.published === false ? " (auto-unpublished for review)" : ""}`
       : `Created as ${saved.published ? "published" : "draft"}`,
   });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth/auth";
-import { requireAdmin } from "@/lib/utils/rbac";
+import { requireRole, requireAdmin } from "@/lib/utils/rbac";
 import { prisma } from "@/lib/db/prismaClient";
 import {
   presignProductImageUploads as _presignUploads,
@@ -19,7 +19,7 @@ export async function presignProductImageUploads(input: {
   files: FileDescriptor[];
 }) {
   const session = await auth();
-  requireAdmin(session?.role);
+  requireRole(session?.role, "editor");
   return _presignUploads(input.productId, input.files);
 }
 
@@ -59,6 +59,6 @@ export async function presignHeroImageUploadAction(
  */
 export async function deleteStorageKeysAction(keys: string[]) {
   const session = await auth();
-  requireAdmin(session?.role);
+  requireRole(session?.role, "editor");
   await _deleteKeys(keys);
 }
