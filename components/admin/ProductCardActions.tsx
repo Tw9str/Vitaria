@@ -12,9 +12,13 @@ import Spinner from "@/components/shared/Spinner";
 export default function ProductCardActions({
   id,
   published,
+  canDelete = false,
+  canPublish = false,
 }: {
   id: string;
   published: boolean;
+  canDelete?: boolean;
+  canPublish?: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -88,43 +92,47 @@ export default function ProductCardActions({
   return (
     <div className="flex items-center gap-1.5">
       {/* Publish toggle */}
-      <button
-        onClick={handleToggle}
-        disabled={isPending}
-        aria-label={optimisticPublished ? "Unpublish" : "Publish"}
-        className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold border transition cursor-pointer disabled:opacity-50 ${
-          optimisticPublished
-            ? "bg-green-500/10 border-green-500/25 text-green-600 dark:text-green-400 hover:bg-green-500/20"
-            : "bg-amber-400/10 border-amber-400/25 text-amber-600 dark:text-amber-400 hover:bg-amber-400/20"
-        }`}
-      >
-        <span
-          className={`h-1.5 w-1.5 rounded-full shrink-0 ${optimisticPublished ? "bg-green-500" : "bg-amber-400"} ${isPending ? "animate-pulse" : ""}`}
-        />
-        {optimisticPublished ? "Published" : "Draft"}
-      </button>
+      {canPublish && (
+        <button
+          onClick={handleToggle}
+          disabled={isPending}
+          aria-label={optimisticPublished ? "Unpublish" : "Publish"}
+          className={`flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[11px] font-semibold border transition cursor-pointer disabled:opacity-50 ${
+            optimisticPublished
+              ? "bg-green-500/10 border-green-500/25 text-green-600 dark:text-green-400 hover:bg-green-500/20"
+              : "bg-amber-400/10 border-amber-400/25 text-amber-600 dark:text-amber-400 hover:bg-amber-400/20"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full shrink-0 ${optimisticPublished ? "bg-green-500" : "bg-amber-400"} ${isPending ? "animate-pulse" : ""}`}
+          />
+          {optimisticPublished ? "Published" : "Draft"}
+        </button>
+      )}
 
       {/* Delete */}
-      <button
-        onClick={() => setConfirmDelete(true)}
-        disabled={isPending}
-        className="flex items-center justify-center rounded-full p-2 border border-border bg-surface text-muted hover:text-red-500 hover:border-red-500/30 disabled:opacity-50 transition cursor-pointer"
-        aria-label="Delete product"
-      >
-        <svg
-          className="h-3.5 w-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+      {canDelete && (
+        <button
+          onClick={() => setConfirmDelete(true)}
+          disabled={isPending}
+          className="flex items-center justify-center rounded-full p-2 border border-border bg-surface text-muted hover:text-red-500 hover:border-red-500/30 disabled:opacity-50 transition cursor-pointer"
+          aria-label="Delete product"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-          />
-        </svg>
-      </button>
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

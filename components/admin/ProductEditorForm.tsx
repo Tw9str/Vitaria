@@ -493,9 +493,11 @@ function SectionCard({
 export default function ProductEditorForm({
   mode,
   product,
+  canDelete = false,
 }: {
   mode: "create" | "edit";
   product?: Product;
+  canDelete?: boolean;
 }) {
   const [actionState, formAction, isPending] = useActionState<
     ProductActionState,
@@ -1000,7 +1002,7 @@ export default function ProductEditorForm({
       </form>
 
       {/* ── Danger zone ── outside the main form ──────────────── */}
-      {product?.id ? (
+      {product?.id && canDelete ? (
         <div className="mt-12">
           <div className="flex items-center gap-4 mb-6">
             <div className="h-px flex-1 bg-border" />

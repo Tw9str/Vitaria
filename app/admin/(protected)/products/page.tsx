@@ -5,10 +5,14 @@ import { getAllProducts } from "@/lib/db/products";
 import { getPublicUrl } from "@/lib/storage/url";
 import EmptyState from "@/components/shared/EmptyState";
 import ProductCardActions from "@/components/admin/ProductCardActions";
+import { auth } from "@/lib/auth/auth";
+import { hasRole } from "@/lib/utils/rbac";
 
 export default async function AdminProducts() {
   let products: Awaited<ReturnType<typeof getAllProducts>> = [];
   let urlMap: Record<string, string> = {};
+  const session = await auth();
+  const canManage = hasRole(session?.role, "admin");
 
   try {
     products = await getAllProducts();
@@ -141,7 +145,12 @@ export default async function AdminProducts() {
 
                     {/* Publish toggle + delete */}
                     <div className="flex items-center justify-between gap-2">
-                      <ProductCardActions id={p.id} published={p.published} />
+                      <ProductCardActions
+                        id={p.id}
+                        published={p.published}
+                        canDelete={canManage}
+                        canPublish={canManage}
+                      />
                       {p.published && (
                         <Link
                           href={`/products/${p.slug}`}
