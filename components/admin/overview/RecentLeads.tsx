@@ -55,7 +55,7 @@ export default function RecentLeads({ leads }: Props) {
         </p>
       ) : (
         <>
-          {/* Column headers — visible on md+ */}
+          {/* Column headers - visible on md+ */}
           <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_96px_68px] items-center gap-x-4 border-b border-border bg-bg/50 px-5 py-2">
             <span className="text-xs font-medium text-subtle">Company</span>
             <span className="text-xs font-medium text-subtle">Contact</span>
@@ -74,12 +74,12 @@ export default function RecentLeads({ leads }: Props) {
                 {/* Company + type (always visible) */}
                 <div className="min-w-0 flex-1 md:flex-none">
                   <p className="truncate text-sm font-medium text-text">
-                    {lead.company ?? "—"}
+                    {lead.company ?? "-"}
                   </p>
                   <p className="truncate text-xs text-muted">{lead.type}</p>
                 </div>
 
-                {/* Contact name + email — md+ only */}
+                {/* Contact name + email - md+ only */}
                 <div className="hidden md:block min-w-0">
                   <p className="truncate text-sm text-text">{lead.name}</p>
                   <p className="truncate text-xs text-muted">{lead.email}</p>

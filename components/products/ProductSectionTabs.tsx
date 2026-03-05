@@ -21,7 +21,7 @@ export default function ProductSectionTabs({
 
   return (
     <div>
-      {/* Tab bar — only shown if more than one section */}
+      {/* Tab bar - only shown if more than one section */}
       {visible.length > 1 && (
         <div className="relative flex gap-1 overflow-x-auto border-b border-border pb-0 scrollbar-none">
           {visible.map((sec, i) => (

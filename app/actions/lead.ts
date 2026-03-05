@@ -40,7 +40,7 @@ export async function updateLeadStatusAction(
     action: "LEAD_STATUS_CHANGED",
     entity: "lead",
     entityId: leadId,
-    entityTitle: lead ? `${lead.name} — ${lead.company}` : leadId,
+    entityTitle: lead ? `${lead.name} - ${lead.company}` : leadId,
     detail: `Status → ${status}`,
   });
 
@@ -78,7 +78,7 @@ export async function updateLeadNotesAction(
     action: "LEAD_NOTES_SAVED",
     entity: "lead",
     entityId: leadId,
-    entityTitle: lead ? `${lead.name} — ${lead.company}` : leadId,
+    entityTitle: lead ? `${lead.name} - ${lead.company}` : leadId,
     detail: notes.trim()
       ? notes.trim().slice(0, 100) + (notes.trim().length > 100 ? "…" : "")
       : "Notes cleared",

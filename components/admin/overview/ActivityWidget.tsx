@@ -173,7 +173,7 @@ export default function ActivityWidget({ logs, imageUrlMap = {} }: Props) {
         </p>
       ) : (
         <>
-          {/* Column headers — visible on md+ */}
+          {/* Column headers - visible on md+ */}
           <div className="hidden md:grid md:grid-cols-[20px_minmax(0,1fr)_minmax(0,160px)_80px_68px] items-center gap-x-4 border-b border-border bg-bg/50 px-5 py-2">
             <span />
             <span className="text-xs font-medium text-subtle">Action</span>
@@ -196,7 +196,7 @@ export default function ActivityWidget({ logs, imageUrlMap = {} }: Props) {
                   key={log.id}
                   className="flex items-center gap-3 px-5 py-3 md:grid md:grid-cols-[20px_minmax(0,1fr)_minmax(0,160px)_80px_68px] md:gap-x-4"
                 >
-                  {/* Entity icon — own column on md+, hidden on mobile */}
+                  {/* Entity icon - own column on md+, hidden on mobile */}
                   <span
                     className={`hidden md:inline-flex items-center justify-center shrink-0 ${
                       ENTITY_ICON_COLORS[log.entity] ?? "text-muted"
@@ -218,7 +218,7 @@ export default function ActivityWidget({ logs, imageUrlMap = {} }: Props) {
                     )}
                   </span>
 
-                  {/* Actor avatar — mobile hidden, md+ handled in By column */}
+                  {/* Actor avatar - mobile hidden, md+ handled in By column */}
 
                   {/* Action + entity title */}
                   <div className="min-w-0 flex-1 md:flex-none">
@@ -271,7 +271,7 @@ export default function ActivityWidget({ logs, imageUrlMap = {} }: Props) {
                     )}
                   </div>
 
-                  {/* By column — md+ with avatar */}
+                  {/* By column - md+ with avatar */}
                   <div className="hidden md:flex items-center gap-2 min-w-0">
                     {avatarUrl ? (
                       <img

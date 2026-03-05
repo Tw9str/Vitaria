@@ -19,7 +19,7 @@ type ToastItem = {
   id: string;
   message: string;
   variant: Variant;
-  /** true once the dismiss timeout starts — triggers slide-out animation */
+  /** true once the dismiss timeout starts - triggers slide-out animation */
   leaving: boolean;
 };
 

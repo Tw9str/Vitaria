@@ -6,7 +6,10 @@ import {
   presignAvatarUploadAction,
   deleteStorageKeysAction,
 } from "@/app/actions/createUploadUrl";
-import { imageFileSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation/validators";
+import {
+  imageFileSchema,
+  ACCEPTED_IMAGE_TYPES,
+} from "@/lib/validation/validators";
 import Alert from "@/components/shared/Alert";
 import Spinner from "@/components/shared/Spinner";
 
@@ -94,9 +97,9 @@ export default function ProfileEditor({
   const fileInputRef = useRef<HTMLInputElement>(null);
   /** Image key that was last successfully persisted to the DB. */
   const dbImageKeyRef = useRef(image ?? "");
-  /** Latest name value — avoids stale closure in debounce. */
+  /** Latest name value - avoids stale closure in debounce. */
   const nameValueRef = useRef(name ?? "");
-  /** Latest avatarKey — avoids stale closure in debounce. */
+  /** Latest avatarKey - avoids stale closure in debounce. */
   const avatarKeyRef = useRef(image ?? "");
 
   // Warn the user if they try to close/refresh the tab during an upload.
@@ -185,7 +188,7 @@ export default function ProfileEditor({
         void deleteStorageKeysAction([avatarKey]);
       }
 
-      // Persist the new key to DB with a plain await — NOT inside startTransition.
+      // Persist the new key to DB with a plain await - NOT inside startTransition.
       // This guarantees the write completes even if the component unmounts
       // (e.g. user navigates away) before this line resolves.
       const fd = new FormData();
@@ -313,7 +316,7 @@ export default function ProfileEditor({
           <Alert variant="warning" className="mt-4">
             <span className="flex items-center gap-2">
               <Spinner className="h-4 w-4 shrink-0" />
-              Uploading image — please don&apos;t navigate away.
+              Uploading image - please don&apos;t navigate away.
             </span>
           </Alert>
         )}

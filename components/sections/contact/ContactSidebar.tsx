@@ -27,7 +27,7 @@ export default function ContactSidebar({
 
   return (
     <aside className="flex flex-col gap-4">
-      {/* Reach us directly — only rendered when at least one channel is visible */}
+      {/* Reach us directly - only rendered when at least one channel is visible */}
       {visibleChannels.length > 0 && (
         <div className="rounded-2xl border border-border bg-surface shadow-soft p-5">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">

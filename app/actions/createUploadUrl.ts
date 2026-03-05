@@ -25,7 +25,7 @@ export async function presignProductImageUploads(input: {
 
 /**
  * Server Action: generate a presigned upload URL for the current user's avatar.
- * Auth-gated — always uses the session user's ID as the storage path.
+ * Auth-gated - always uses the session user's ID as the storage path.
  */
 export async function presignAvatarUploadAction(file: FileDescriptor) {
   const session = await auth();

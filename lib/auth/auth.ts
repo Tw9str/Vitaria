@@ -8,7 +8,7 @@ import type { Role } from "@prisma/client";
 import { config } from "@/lib/core/config";
 
 // ---------------------------------------------------------------------------
-// Module augmentation — adds `role` and `id` to the session user type
+// Module augmentation - adds `role` and `id` to the session user type
 // ---------------------------------------------------------------------------
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -57,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     async session({ session, user }) {
       // With database sessions NextAuth reads the user row on every request
-      // so role / name / image are always live — no re-login needed after
+      // so role / name / image are always live - no re-login needed after
       // profile or role changes.
       const dbUser = await prisma.user.findUnique({
         where: { id: user.id },

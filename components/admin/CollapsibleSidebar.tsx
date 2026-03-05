@@ -36,7 +36,7 @@ export default function CollapsibleSidebar({ user }: { user: ShellUser }) {
   }, [expanded]);
 
   return (
-    // Always w-14 in flow — expanding never shifts layout
+    // Always w-14 in flow - expanding never shifts layout
     <div className="lg:hidden shrink-0 w-14 relative">
       {/* ── Sticky icon strip ─────────────────────────── */}
       <div className="w-14 fixed top-0 left-0 h-dvh flex flex-col border-r border-border bg-surface z-30">
@@ -96,7 +96,7 @@ export default function CollapsibleSidebar({ user }: { user: ShellUser }) {
         </div>
       </div>
 
-      {/* ── Expanded overlay — zero layout impact ───────── */}
+      {/* ── Expanded overlay - zero layout impact ───────── */}
       {expanded && (
         <>
           {/* Backdrop */}

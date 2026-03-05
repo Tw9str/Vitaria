@@ -161,7 +161,7 @@ function DeleteButton({ userId, isSelf }: { userId: string; isSelf: boolean }) {
   if (isSelf) {
     return (
       <span className="text-xs text-subtle" title="Cannot delete yourself">
-        —
+        -
       </span>
     );
   }
@@ -446,7 +446,7 @@ function NameCell({
           </div>
         ) : (
           <div className="flex items-center gap-1.5">
-            <p className="font-medium text-text truncate">
+            <p className="font-medium text-text truncate capitalize">
               {name ?? <span className="italic text-subtle">No name</span>}
               {isSelf && (
                 <span className="ml-2 rounded-full bg-gold/15 px-2 py-0.5 text-xs text-gold">
@@ -476,7 +476,7 @@ function NameCell({
             </button>
           </div>
         )}
-        <p className="mt-0.5 text-xs text-muted truncate">{email ?? "—"}</p>
+        <p className="mt-0.5 text-xs text-muted truncate">{email ?? "-"}</p>
       </div>
     </div>
   );

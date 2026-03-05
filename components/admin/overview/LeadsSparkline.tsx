@@ -43,7 +43,7 @@ type Props = {
 export default function LeadsSparkline({ weekCount, sparkCounts }: Props) {
   return (
     <div className="rounded-[18px] border border-border bg-surface p-4">
-      <p className="text-xs text-subtle">Leads — last 7 days</p>
+      <p className="text-xs text-subtle">Leads - last 7 days</p>
       <p className="mt-1 text-2xl font-bold tabular-nums text-text">
         {weekCount}
       </p>

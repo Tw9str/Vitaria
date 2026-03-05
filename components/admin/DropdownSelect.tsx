@@ -106,7 +106,7 @@ export default function DropdownSelect({
         </svg>
       </button>
 
-      {/* Dropdown panel — portalled to body to escape overflow:hidden ancestors */}
+      {/* Dropdown panel - portalled to body to escape overflow:hidden ancestors */}
       {open &&
         createPortal(
           <ul

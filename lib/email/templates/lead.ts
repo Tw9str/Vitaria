@@ -1,305 +1,269 @@
 import type { LeadInput } from "@/lib/validation/validators";
 import { SITE } from "@/lib/core/site";
+import { getPublicUrl } from "@/lib/storage/url";
 
-// ─── Brand tokens ─────────────────────────────────────────────────────────────
-// Solid-color equivalents of globals.css dark theme. Dark backgrounds render
-// correctly in Outlook (via bgcolor attrs), Gmail (already dark = no inversion),
-// Apple Mail and Outlook.com.
+// ─── Tokens - exact app colour palette, solid equivalents of CSS vars ─────────
+const BG = "#0b0f12"; // --color-bg
+const CARD = "#14181c"; // --color-surface (rgba 255 255 255 0.06 on BG)
+const INNER = "#111519"; // slightly darker for inset rows
+const BORDER = "#1c2128"; // --color-border (rgba 255 255 255 0.12 on BG)
+const SEP = "#161b20"; // row separator
+const TEXT = "#eae6e0"; // --color-text
+const MUTED = "#b9b4ac"; // --color-muted
+const SUBTLE = "#8b8680"; // --color-subtle
+const GOLD = "#c9a35a"; // --color-gold
+const GOLD_BG = "#110e07"; // very dark gold tint - CTA button fill in Outlook
 
-const PAGE_BG    = "#0b0f12"; // --color-bg
-const HEADER_BG  = "#163524"; // brand-ink (dark green header band)
-const CARD_BG    = "#141a1e"; // --color-surface equivalent
-const PANEL_BG   = "#111418"; // slightly darker panel inside card
-const BORDER     = "#1e2428"; // --color-border equivalent
-const ROW_SEP    = "#1a2024"; // row separator
-const TEXT       = "#eae6e0"; // --color-text equivalent
-const MUTED      = "#b8b3ab"; // --color-muted equivalent
-const SUBTLE     = "#8a8580"; // --color-subtle equivalent
-const GOLD       = "#c9a35a"; // --color-gold
-const GOLD_DARK  = "#9f7b37"; // darker gold for text on gold bg
-const BRAND_LINK = "#7fb88a"; // light muted green for links (readable on dark)
-
-// ─── Safety helpers ───────────────────────────────────────────────────────────
-
-function escapeHtml(value: string): string {
-  return value
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function esc(v: string): string {
+  return v
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
-
-function safeText(value?: string | null): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  return trimmed ? escapeHtml(trimmed) : null;
+function st(v?: string | null): string | null {
+  if (!v) return null;
+  const t = v.trim();
+  return t ? esc(t) : null;
 }
-
-function safeUrl(value?: string | null): string | null {
-  if (!value) return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
+function su(v?: string | null): string | null {
+  if (!v) return null;
+  const t = v.trim();
   try {
-    const url = new URL(trimmed);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    return escapeHtml(trimmed);
+    const u = new URL(t);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return esc(t);
   } catch {
     return null;
   }
 }
-
-function formatDate(date?: Date): string | null {
-  if (!date) return null;
+function fd(d?: Date): string | null {
+  if (!d) return null;
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
-  }).format(date);
+  }).format(d);
 }
 
-// ─── Layout primitives ────────────────────────────────────────────────────────
-
-function row(label: string, value: string | null): string {
+// ─── Row: label above value ───────────────────────────────────────────────────
+function row(label: string, value: string | null, last = false): string {
   if (!value) return "";
-  return `
+  return `<tr>
+  <td bgcolor="${INNER}" style="background:${INNER};padding:12px 20px;${last ? "" : `border-bottom:1px solid ${SEP};`}">
+    <p style="margin:0 0 2px;font-size:10px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:${SUBTLE};">${esc(label)}</p>
+    <p style="margin:0;font-size:14px;line-height:1.55;color:${TEXT};">${value}</p>
+  </td>
+</tr>`;
+}
+
+// ─── Primary CTA button ───────────────────────────────────────────────────────
+function btn(href: string, label: string): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" align="center">
   <tr>
-    <td width="110" style="padding:10px 14px 10px 0;vertical-align:top;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:${SUBTLE};white-space:nowrap;">${escapeHtml(label)}</td>
-    <td style="padding:10px 0;vertical-align:top;font-size:14px;line-height:1.6;color:${TEXT};border-bottom:1px solid ${ROW_SEP};">${value}</td>
-  </tr>`;
+    <td bgcolor="${GOLD}" style="background:${GOLD};border-radius:999px;mso-border-alt:none;padding:0;">
+      <a href="${href}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:14px 32px;font-size:14px;font-weight:800;letter-spacing:0.02em;color:#08100c;text-decoration:none;line-height:1;white-space:nowrap;">${esc(label)}</a>
+    </td>
+  </tr>
+</table>`;
 }
 
-function pill(label: string, accent = false): string {
-  const bg     = accent ? GOLD     : "#1e2a24";
-  const fg     = accent ? GOLD_DARK : BRAND_LINK;
-  const border = accent ? GOLD_DARK : "#2a3c30";
-  return `<span style="display:inline-block;padding:4px 12px;border:1px solid ${border};border-radius:999px;background:${bg};font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:${fg};">${escapeHtml(label)}</span>`;
-}
-
-// Rounded-full table button — matches website's rounded-full pill buttons
-function btn(href: string, label: string, primary = true): string {
-  if (primary) {
-    return `<table role="presentation" cellpadding="0" cellspacing="0" style="display:inline-table;"><tr>
-    <td bgcolor="${GOLD}" style="background:${GOLD};border:1px solid ${GOLD_DARK};border-radius:999px;">
-      <a href="${href}" style="display:inline-block;padding:11px 24px;font-size:13px;font-weight:800;color:#0f1e14;text-decoration:none;line-height:1;white-space:nowrap;">${escapeHtml(label)}</a>
-    </td></tr></table>`;
-  }
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="display:inline-table;"><tr>
-    <td bgcolor="${BORDER}" style="background:${BORDER};border:1px solid #2a3540;border-radius:999px;">
-      <a href="${href}" style="display:inline-block;padding:11px 24px;font-size:13px;font-weight:700;color:${MUTED};text-decoration:none;line-height:1;white-space:nowrap;">${escapeHtml(label)}</a>
-    </td></tr></table>`;
+// ─── Ghost secondary button ───────────────────────────────────────────────────
+function ghost(href: string, label: string): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" align="center">
+  <tr>
+    <td style="border:1px solid ${BORDER};border-radius:999px;mso-border-alt:none;padding:0;">
+      <a href="${href}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 28px;font-size:13px;font-weight:600;color:${MUTED};text-decoration:none;line-height:1;white-space:nowrap;">${esc(label)}</a>
+    </td>
+  </tr>
+</table>`;
 }
 
 // ─── Shell ────────────────────────────────────────────────────────────────────
-// Dark outer wrap → brand-ink header → gold rule → dark card (website surface
-// card style: border + bg-surface + rounded-2xl). No overflow:hidden. Both
-// bgcolor attr AND background CSS for full Outlook compatibility.
-
-function shell(body: string): string {
-  const siteUrl  = escapeHtml(SITE.url);
-  const siteName = escapeHtml(SITE.name);
-  const legal    = escapeHtml(SITE.legalName);
+function shell(content: string, narrow = false): string {
+  const logo = getPublicUrl("logo.png");
+  const siteUrl = esc(SITE.url);
+  const name = esc(SITE.name);
+  const legal = esc(SITE.legalName);
+  const w = narrow ? "520" : "600";
 
   return `<!DOCTYPE html>
-<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="supported-color-schemes" content="dark" />
-  <title>${siteName}</title>
-  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings>
-    <o:PixelsPerInch>96</o:PixelsPerInch>
-  </o:OfficeDocumentSettings></xml></noscript><![endif]-->
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="supported-color-schemes" content="dark"/>
+<title>${name}</title>
+<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
 </head>
-<body style="margin:0;padding:0;background:${PAGE_BG};font-family:'Segoe UI',Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;color:${TEXT};">
+<body bgcolor="${BG}" style="margin:0;padding:0;background:${BG};font-family:'Segoe UI',Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;mso-line-height-rule:exactly;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${BG}" style="background:${BG};">
+<tr><td align="center" bgcolor="${BG}" style="background:${BG};padding:44px 16px 52px;">
 
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="${PAGE_BG}" style="background:${PAGE_BG};">
+<table role="presentation" width="${w}" cellpadding="0" cellspacing="0" style="max-width:${w}px;width:100%;">
+
+  <!-- ── LOGO ─────────────────────────────────────── -->
   <tr>
-    <td align="center" style="padding:40px 16px 48px;">
-
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
-
-        <!-- HEADER: brand-ink green band -->
-        <tr>
-          <td bgcolor="${HEADER_BG}" style="background:${HEADER_BG};padding:22px 30px;border-radius:16px 16px 0 0;mso-border-alt:none;">
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-              <td style="vertical-align:middle;">
-                <span style="font-size:15px;font-weight:800;letter-spacing:0.24em;text-transform:uppercase;color:#ffffff;">${siteName}</span>
-              </td>
-              <td align="right" style="vertical-align:middle;">
-                <a href="${siteUrl}" style="font-size:11px;color:rgba(255,255,255,0.35);text-decoration:none;">${siteUrl}</a>
-              </td>
-            </tr></table>
-          </td>
-        </tr>
-
-        <!-- GOLD SEPARATOR -->
-        <tr>
-          <td bgcolor="${GOLD}" height="2" style="background:${GOLD};height:2px;font-size:0;line-height:0;">&nbsp;</td>
-        </tr>
-
-        <!-- CARD: matches website "rounded-2xl border border-border bg-surface" -->
-        <tr>
-          <td bgcolor="${CARD_BG}" style="background:${CARD_BG};padding:32px 30px 28px;border:1px solid ${BORDER};border-top:none;border-radius:0 0 16px 16px;mso-border-alt:none;">
-            ${body}
-          </td>
-        </tr>
-
-        <!-- FOOTER -->
-        <tr>
-          <td style="padding:20px 0 0;text-align:center;">
-            <p style="margin:0;font-size:11px;color:#484340;line-height:1.7;">
-              ${legal}&nbsp;&middot;&nbsp;<a href="${siteUrl}" style="color:#484340;text-decoration:none;">${siteUrl}</a>
-            </p>
-            <p style="margin:4px 0 0;font-size:11px;color:#363230;line-height:1.7;">
-              You are receiving this because you contacted ${siteName}.
-            </p>
-          </td>
-        </tr>
-
-      </table>
+    <td bgcolor="${BG}" align="center" style="background:${BG};padding-bottom:24px;">
+      <a href="${siteUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-block;text-decoration:none;">
+        <img src="${logo}" alt="${name}" width="110" height="auto"
+            style="display:block;width:110px;height:auto;border:0;"/>
+      </a>
     </td>
   </tr>
+
+  <!-- ── MAIN CARD ─────────────────────────────────── -->
+  <tr>
+    <td bgcolor="${CARD}" style="background:${CARD};border:1px solid ${BORDER};border-top:3px solid ${GOLD};border-radius:16px;mso-border-alt:none;padding:36px 36px 32px;">
+      ${content}
+    </td>
+  </tr>
+
+  <!-- ── FOOTER ────────────────────────────────────── -->
+  <tr>
+    <td bgcolor="${BG}" align="center" style="background:${BG};padding:24px 0 0;">
+      <p style="margin:0 0 3px;font-size:11px;line-height:1.6;color:${SUBTLE};">
+        &copy; ${new Date().getFullYear()} ${legal}
+        &nbsp;&middot;&nbsp;
+        <a href="${siteUrl}" target="_blank" rel="noopener noreferrer" style="color:${SUBTLE};text-decoration:none;">${siteUrl}</a>
+      </p>
+      <p style="margin:0;font-size:10px;color:${SUBTLE};line-height:1.6;">
+        You received this because you contacted ${name}.
+      </p>
+    </td>
+  </tr>
+
 </table>
 
+</td></tr>
+</table>
 </body>
 </html>`;
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
 export type LeadEmailData = LeadInput & {
   id?: string;
   createdAt?: Date;
+  referrer?: string | null;
+  ip?: string | null;
+  userAgent?: string | null;
 };
 
 // ─── Admin notification ───────────────────────────────────────────────────────
-
 export function buildAdminLeadNotification(lead: LeadEmailData): {
   subject: string;
   html: string;
 } {
-  const subject = `New wholesale inquiry — ${lead.company}`;
-  const name    = safeText(lead.name);
-  const email   = safeText(lead.email);
-  const company = safeText(lead.company) ?? "New inquiry";
-  const type    = safeText(lead.type);
-  const region  = safeText(lead.region);
-  const website = safeUrl(lead.website);
-  const message = safeText(lead.message);
-  const date    = formatDate(lead.createdAt);
+  const company = st(lead.company) ?? "New inquiry";
+  const name = st(lead.name);
+  const email = st(lead.email);
+  const type = st(lead.type);
+  const region = st(lead.region);
+  const website = su(lead.website);
+  const message = st(lead.message);
+  const referrer = st(lead.referrer);
+  const referrerUrl = su(lead.referrer);
+  const ip = st(lead.ip);
+  const userAgent = st(lead.userAgent);
+  const date = fd(lead.createdAt);
 
-  const html = shell(`
+  const content = `
+    <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${SUBTLE};">New inquiry</p>
+    <h1 style="margin:0 0 4px;font-size:26px;font-weight:800;line-height:1.15;color:${TEXT};">${company}</h1>
+    ${date ? `<p style="margin:0 0 28px;font-size:12px;color:${SUBTLE};">${esc(date)}</p>` : `<div style="margin-bottom:28px;"></div>`}
 
-    <!-- HEADING -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;"><tr>
-      <td style="vertical-align:top;">
-        <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${SUBTLE};">Wholesale inquiry</p>
-        <h1 style="margin:0;font-size:24px;font-weight:800;line-height:1.2;color:${TEXT};">${company}</h1>
-        ${date ? `<p style="margin:7px 0 0;font-size:12px;color:${SUBTLE};">${escapeHtml(date)}</p>` : ""}
-      </td>
-      <td align="right" style="vertical-align:top;padding-left:16px;">${pill("New", true)}</td>
-    </tr></table>
-
-    <!-- CONTACT PANEL: matches website sidebar card -->
+    <!-- contact fields -->
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-      style="border:1px solid ${BORDER};border-radius:16px;margin:0 0 20px;">
-      <tr><td bgcolor="${PANEL_BG}" style="background:${PANEL_BG};padding:4px 18px 14px;border-radius:16px;">
-        <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:${SUBTLE};">Contact details</p>
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-          ${row("Name",    name)}
-          ${row("Email",   email   ? `<a href="mailto:${email}" style="color:${BRAND_LINK};text-decoration:none;font-weight:600;">${email}</a>` : null)}
-          ${row("Type",    type)}
-          ${row("Region",  region)}
-          ${row("Website", website ? `<a href="${website}" style="color:${BRAND_LINK};text-decoration:none;font-weight:600;">${website}</a>` : null)}
-        </table>
-      </td></tr>
+      style="border:1px solid ${BORDER};border-radius:12px;overflow:hidden;margin-bottom:20px;">
+      ${row("Contact name", name)}
+      ${row("Email", email ? `<a href="mailto:${email}" target="_blank" rel="noopener noreferrer" style="color:${GOLD};text-decoration:none;">${email}</a>` : null)}
+      ${row("Business type", type)}
+      ${row("Region", region)}
+      ${row("Website", website ? `<a href="${website}" target="_blank" rel="noopener noreferrer" style="color:${GOLD};text-decoration:none;">${website}</a>` : null)}
+      ${row("Message", message ? `<span style="white-space:pre-wrap;">${message}</span>` : null)}
+      ${row("Referrer", referrerUrl ? `<a href="${referrerUrl}" target="_blank" rel="noopener noreferrer" style="color:${GOLD};text-decoration:none;">${referrerUrl}</a>` : referrer)}
+      ${row("IP address", ip)}
+      ${row("User agent", userAgent, true)}
     </table>
 
-    ${message ? `
-    <!-- MESSAGE PANEL -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-      style="border:1px solid ${BORDER};border-radius:16px;margin:0 0 24px;">
-      <tr><td bgcolor="${GOLD}" height="2" style="background:${GOLD};height:2px;font-size:0;line-height:0;border-radius:16px 16px 0 0;">&nbsp;</td></tr>
-      <tr><td bgcolor="${PANEL_BG}" style="background:${PANEL_BG};padding:16px 18px;border-radius:0 0 16px 16px;">
-        <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:${SUBTLE};">Message</p>
-        <p style="margin:0;font-size:14px;line-height:1.8;color:${TEXT};white-space:pre-wrap;">${message}</p>
-      </td></tr>
-    </table>` : ""}
+    ${
+      lead.id && email
+        ? `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" style="padding-top:8px;">${btn(`${esc(SITE.url)}/admin/leads`, "Open in admin")}</td>
+      </tr>
+      <tr>
+        <td align="center" style="padding-top:10px;">${ghost(`mailto:${email}`, `Reply to ${lead.name ?? "lead"}`)}</td>
+      </tr>
+    </table>`
+        : ""
+    }
+  `;
 
-    ${lead.id && email ? `
-    <!-- ACTIONS -->
-    <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-      <td style="padding-right:10px;">${btn(`${escapeHtml(SITE.url)}/admin/leads`, "Open admin", true)}</td>
-      <td>${btn(`mailto:${email}`, "Reply to lead", false)}</td>
-    </tr></table>` : ""}
-
-  `);
-
-  return { subject, html };
+  return {
+    subject: `New inquiry - ${lead.company?.trim() || lead.name}`,
+    html: shell(content),
+  };
 }
 
-// ─── Lead confirmation ────────────────────────────────────────────────────────
-
+// ─── Customer confirmation ────────────────────────────────────────────────────
 export function buildLeadConfirmation(lead: LeadEmailData): {
   subject: string;
   html: string;
 } {
-  const subject   = `We received your inquiry — ${SITE.name}`;
-  const name      = safeText(lead.name) ?? "there";
-  const firstName = escapeHtml((lead.name?.trim().split(/\s+/)[0] || "there").trim());
-  const company   = safeText(lead.company);
-  const type      = safeText(lead.type);
-  const region    = safeText(lead.region);
-  const email     = safeText(lead.email);
-  const siteEmail = escapeHtml(SITE.email);
+  const firstName = esc((lead.name?.trim().split(/\s+/)[0] || "there").trim());
+  const name = st(lead.name) ?? "there";
+  const company = st(lead.company);
+  const email = st(lead.email);
+  const website = su(lead.website);
+  const message = st(lead.message);
+  const siteEmail = esc(SITE.email);
 
-  const html = shell(`
-
-    <!-- STATUS PILL -->
-    <p style="margin:0 0 16px;">${pill("Inquiry received")}</p>
-
-    <!-- HEADING -->
-    <h1 style="margin:0 0 10px;font-size:24px;font-weight:800;line-height:1.2;color:${TEXT};">
-      Thank you, ${firstName}.
+  const content = `
+    <h1 style="margin:0 0 16px;font-size:26px;font-weight:800;line-height:1.2;color:${TEXT};">
+      Hi ${firstName},<br/>
+      <span style="color:${GOLD};">we got your message.</span>
     </h1>
-    <p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:${MUTED};">
-      We received your wholesale inquiry${company ? ` for <strong style="color:${TEXT};">${company}</strong>` : ""}.
-      Our team will review your details and be in touch with catalog, pricing, and next steps within one business day.
+
+    <p style="margin:0 0 32px;font-size:15px;line-height:1.8;color:${MUTED};">
+      Thanks for reaching out${company ? ` on behalf of <strong style="color:${TEXT};">${company}</strong>` : ""}. We've received your message and someone from our team will be in touch with you shortly.
     </p>
 
-    <!-- SUMMARY PANEL -->
+    <!-- full inquiry details -->
+    <p style="margin:0 0 10px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${SUBTLE};">Your inquiry</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-      style="border:1px solid ${BORDER};border-radius:16px;margin:0 0 24px;">
-      <tr><td bgcolor="${PANEL_BG}" style="background:${PANEL_BG};padding:4px 18px 14px;border-radius:16px;">
-        <p style="margin:14px 0 8px;font-size:11px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:${SUBTLE};">Your inquiry summary</p>
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-          ${row("Name",    name)}
-          ${row("Company", company)}
-          ${row("Type",    type)}
-          ${row("Region",  region)}
-          ${row("Email",   email)}
-        </table>
-      </td></tr>
+      style="border:1px solid ${BORDER};border-radius:12px;overflow:hidden;margin-bottom:28px;">
+      ${row("Name", name)}
+      ${row("Email", email)}
+      ${row("Website", website ? `<a href="${website}" target="_blank" rel="noopener noreferrer" style="color:${GOLD};text-decoration:none;">${website}</a>` : null)}
+      ${message ? row("Your message", `<span style="white-space:pre-wrap;">${message}</span>`, true) : ""}
     </table>
 
-    <!-- ACTIONS -->
-    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;"><tr>
-      <td style="padding-right:10px;">${btn(`mailto:${siteEmail}`, "Email us", true)}</td>
-      <td>${btn(`${escapeHtml(SITE.url)}`, "Visit website", false)}</td>
-    </tr></table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" style="padding-top:8px;">${btn(`mailto:${siteEmail}`, "Contact us")}</td>
+      </tr>
+      <tr>
+        <td align="center" style="padding-top:10px;">${ghost(`${esc(SITE.url)}`, "Visit website")}</td>
+      </tr>
+    </table>
 
-    <!-- SIGN-OFF -->
-    <p style="margin:0;font-size:13px;line-height:1.9;color:${MUTED};">
-      Warm regards,<br />
-      <strong style="color:${TEXT};">The ${escapeHtml(SITE.name)} Wholesale Team</strong><br />
-      <a href="mailto:${siteEmail}" style="color:${BRAND_LINK};text-decoration:none;">${siteEmail}</a>
+    <p style="margin:32px 0 0;font-size:13px;line-height:1.9;color:${MUTED};border-top:1px solid ${BORDER};padding-top:24px;">
+      Warm regards,<br/>
+      <strong style="color:${TEXT};">The ${esc(SITE.name)} Team</strong><br/>
+      <a href="mailto:${siteEmail}" target="_blank" rel="noopener noreferrer" style="color:${GOLD};text-decoration:none;">${siteEmail}</a>
     </p>
+  `;
 
-  `);
-
-  return { subject, html };
+  return {
+    subject: `We received your inquiry - ${SITE.name}`,
+    html: shell(content),
+  };
 }

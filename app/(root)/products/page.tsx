@@ -91,7 +91,7 @@ export default async function ProductsPage({
           </p>
         </div>
 
-        {/* Filter bar — wrapped in Suspense because it uses useSearchParams */}
+        {/* Filter bar - wrapped in Suspense because it uses useSearchParams */}
         <Suspense fallback={<FilterBarSkeleton />}>
           <ProductFilterBar
             highlights={highlights}

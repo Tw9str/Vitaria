@@ -15,14 +15,14 @@ function getVisible(width: number) {
 export type CarouselProps<T> = {
   items: T[];
   /**
-   * Unique key for each item — used for React key and clone detection.
+   * Unique key for each item - used for React key and clone detection.
    * Must be stable across renders.
    */
   getKey: (item: T) => string;
   /**
    * Render a single slide.
-   * `isClone` — hide clones from a11y (aria-hidden / tabIndex).
-   * `wasDragging` — ref to check in onClick to cancel accidental navigations.
+   * `isClone` - hide clones from a11y (aria-hidden / tabIndex).
+   * `wasDragging` - ref to check in onClick to cancel accidental navigations.
    */
   children: (
     item: T,

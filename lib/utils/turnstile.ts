@@ -8,7 +8,7 @@ export async function verifyTurnstileToken(
   token: string,
   ip?: string,
 ): Promise<TurnstileResult> {
-  // Reject empty tokens immediately — no need to hit Cloudflare.
+  // Reject empty tokens immediately - no need to hit Cloudflare.
   if (!token) {
     return { success: false, errorCodes: ["missing-input-response"] };
   }

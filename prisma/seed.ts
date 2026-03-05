@@ -319,7 +319,7 @@ const notes = [
   },
   {
     content:
-      "Contact logistics team about reducing lead time from Crete warehouse — currently 14 days, target 10.",
+      "Contact logistics team about reducing lead time from Crete warehouse - currently 14 days, target 10.",
     pinned: false,
   },
   {

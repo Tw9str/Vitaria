@@ -235,7 +235,7 @@ export default function NotesWidget({ notes, imageUrlMap = {} }: Props) {
                   </svg>
                 </button>
 
-                {/* Content — click to edit */}
+                {/* Content - click to edit */}
                 <button
                   className="min-w-0 flex-1 cursor-pointer text-left"
                   onClick={() => setModal({ type: "edit", note })}

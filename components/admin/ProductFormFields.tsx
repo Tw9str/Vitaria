@@ -1,5 +1,5 @@
 // Shared primitive form-field components for the product editor.
-// These are intentionally plain — no "use client" needed since they contain
+// These are intentionally plain - no "use client" needed since they contain
 // no hooks and are used inside a client component tree.
 
 import { type ReactNode } from "react";

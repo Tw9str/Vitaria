@@ -114,7 +114,7 @@ export type LoginInput = z.infer<typeof loginSchema>;
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// Image file (client-side only — uses browser File API)
+// Image file (client-side only - uses browser File API)
 // ---------------------------------------------------------------------------
 
 export const ACCEPTED_IMAGE_TYPES = [

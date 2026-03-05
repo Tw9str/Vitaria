@@ -93,7 +93,7 @@ export default async function ProductPage({ params }: PageProps) {
             {/* Left: image */}
             <HeroImage title={product.title} src={heroSrc} />
 
-            {/* Right: info — floats on page background, no card wrapper */}
+            {/* Right: info - floats on page background, no card wrapper */}
             <div className="flex min-w-0 flex-col lg:sticky lg:top-8">
               {/* Category */}
               {product.highlight && (
@@ -175,7 +175,7 @@ export default async function ProductPage({ params }: PageProps) {
                   <div className="relative aspect-square">
                     <Image
                       src={src}
-                      alt={`${product.title} — image ${idx + 1}`}
+                      alt={`${product.title} - image ${idx + 1}`}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                       className="object-cover transition duration-500 group-hover:scale-[1.04]"
@@ -189,7 +189,7 @@ export default async function ProductPage({ params }: PageProps) {
 
         {/* ── Bottom CTA ── */}
         <div className="mx-auto mt-20 max-w-290 px-5">
-          <div className="overflow-hidden rounded-[24px] bg-brand-ink px-8 py-12 text-center shadow-(--shadow-soft)">
+          <div className="overflow-hidden rounded-3xl bg-brand-ink px-8 py-12 text-center shadow-(--shadow-soft)">
             <p className="text-xs font-semibold uppercase tracking-widest text-white/50">
               Wholesale inquiry
             </p>

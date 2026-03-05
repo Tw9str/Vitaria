@@ -70,7 +70,7 @@ export type ProductActionState = {
   success?: boolean;
   /** Updated slug after a successful save (may differ from the prop if title changed). */
   savedSlug?: string;
-  /** Raw submitted values — returned on validation failure so the form can
+  /** Raw submitted values - returned on validation failure so the form can
    *  restore what the user typed. */
   values?: Partial<Record<string, string>>;
 } | null;
@@ -249,7 +249,7 @@ export async function deleteProductAction(formData: FormData) {
     severity: "warning",
   });
 
-  // Clean up R2 after DB delete (non-blocking — errors are logged, not thrown)
+  // Clean up R2 after DB delete (non-blocking - errors are logged, not thrown)
   if (product) {
     await deleteProductStorage(product.image, product.gallery);
   }

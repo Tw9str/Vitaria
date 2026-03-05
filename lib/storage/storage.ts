@@ -2,7 +2,7 @@
  * lib/storage.ts
  *
  * Pure server-side R2 / presigned-URL helpers.
- * Import these in Server Actions or Route Handlers only — never in Client Components.
+ * Import these in Server Actions or Route Handlers only - never in Client Components.
  */
 
 import { PutObjectCommand, DeleteObjectsCommand } from "@aws-sdk/client-s3";
@@ -113,7 +113,7 @@ export async function deleteStorageKeys(keys: string[]): Promise<void> {
       }),
     );
   } catch (cause) {
-    // Log but don't rethrow — storage cleanup should never crash the caller
+    // Log but don't rethrow - storage cleanup should never crash the caller
     console.error("[storage] deleteStorageKeys failed:", cause);
   }
 }

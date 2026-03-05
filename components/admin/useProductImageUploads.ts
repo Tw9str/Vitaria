@@ -134,7 +134,7 @@ export function useProductImageUploads({
   const [uploads, dispatchUploads] = useReducer(uploadsReducer, []);
   const [galleryError, setGalleryError] = useState("");
 
-  // ── Public view URLs (permanent — bucket is public) ———————————————————
+  // ── Public view URLs (permanent - bucket is public) -------------------
   const previewKeys = useMemo(
     () => [heroKey, ...galleryKeys].filter(Boolean),
     [heroKey, galleryKeys],

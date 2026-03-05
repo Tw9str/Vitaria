@@ -41,7 +41,7 @@ export default function MobileAdminNav({ user }: { user: ShellUser }) {
 
   return (
     <>
-      {/* Hamburger button — sits inside the mobile top bar */}
+      {/* Hamburger button - sits inside the mobile top bar */}
       <button
         type="button"
         onClick={() => setOpen(true)}

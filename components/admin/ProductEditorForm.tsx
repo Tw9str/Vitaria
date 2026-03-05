@@ -29,7 +29,7 @@ type Product = Prisma.ProductGetPayload<{}> & {
 const ACCEPTED_IMAGE_TYPES = ACCEPTED_TYPES.join(",");
 
 // ---------------------------------------------------------------------------
-// Hook: controlled field values — seeded from submitted values on error,
+// Hook: controlled field values - seeded from submitted values on error,
 // or from the saved product initially.
 // ---------------------------------------------------------------------------
 function useFieldValues(
@@ -112,7 +112,7 @@ function useFieldValues(
 }
 
 // ---------------------------------------------------------------------------
-// SectionsEditor — unlimited custom sections, each with heading + item list
+// SectionsEditor - unlimited custom sections, each with heading + item list
 // ---------------------------------------------------------------------------
 function ItemList({
   items,
@@ -347,7 +347,7 @@ function SectionsEditor({
 }
 
 // ---------------------------------------------------------------------------
-// SpecsEditor — free key-value pair rows
+// SpecsEditor - free key-value pair rows
 // ---------------------------------------------------------------------------
 function DeleteSubmitButton() {
   const { pending } = useFormStatus();
@@ -465,7 +465,7 @@ function SpecsEditor({
 }
 
 // ---------------------------------------------------------------------------
-// SectionCard — groups related fields with a labelled header
+// SectionCard - groups related fields with a labelled header
 // ---------------------------------------------------------------------------
 function SectionCard({
   title,
@@ -624,7 +624,7 @@ export default function ProductEditorForm({
           value={galleryKeys.join("\n")}
           readOnly
         />
-        {/* Hidden published value — controlled by the toggle in the action bar */}
+        {/* Hidden published value - controlled by the toggle in the action bar */}
         <input
           type="hidden"
           name="published"
@@ -665,7 +665,7 @@ export default function ProductEditorForm({
             maxLength={30}
             errors={actionState?.fieldErrors?.highlight}
           />
-          {/* Public URL — read-only, edit mode only */}
+          {/* Public URL - read-only, edit mode only */}
           {mode === "edit" && product?.slug && (
             <div>
               <span className="text-xs text-subtle block mb-1.5">

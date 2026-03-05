@@ -155,11 +155,10 @@ export default function InquiryForm({
             </svg>
           </div>
           <h3 className="mt-5 text-xl font-semibold tracking-tight">
-            We&apos;ve got your inquiry!
+            Your message is on its way.
           </h3>
           <p className="mt-2 max-w-[34ch] text-sm text-muted leading-relaxed">
-            Expect the catalog, pricing, and next steps in your inbox within one
-            business day.
+            We&apos;ve received your inquiry and will be in touch soon.
           </p>
           <button
             type="button"

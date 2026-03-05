@@ -70,7 +70,7 @@ export default function ProductCard({
             {card.summary}
           </p>
 
-          {/* Footer — pinned to bottom */}
+          {/* Footer - pinned to bottom */}
           <div className="mt-auto flex items-center justify-between gap-2 pt-3">
             {card.firstSpec ? (
               <p className="min-w-0 truncate text-[11px] text-subtle">

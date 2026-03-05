@@ -344,7 +344,7 @@ export default function ContactEditor({
                         ${i !== 0 ? "border-t border-border" : ""}
                         ${!ch.visible ? "opacity-50" : ""}`}
                       >
-                        {/* Label — hidden on very small, shown sm+ */}
+                        {/* Label - hidden on very small, shown sm+ */}
                         <div className="hidden sm:flex items-center gap-3 px-5 py-4">
                           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/5 dark:bg-white/5 text-muted">
                             {icon}

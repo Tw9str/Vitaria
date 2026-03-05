@@ -249,7 +249,7 @@ export default function LogsListClient({
                             {log.detail}
                           </span>
                         ) : (
-                          <span className="text-subtle/40">—</span>
+                          <span className="text-subtle/40">-</span>
                         )}
                       </td>
                       {/* Date */}

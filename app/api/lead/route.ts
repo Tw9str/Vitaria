@@ -51,8 +51,15 @@ export async function POST(req: Request) {
       },
     });
 
-    // Fire emails in parallel — failures are logged but never break the response.
-    const leadData = { ...parsed.data, id: lead.id, createdAt: lead.createdAt };
+    // Fire emails in parallel - failures are logged but never break the response.
+    const leadData = {
+      ...parsed.data,
+      id: lead.id,
+      createdAt: lead.createdAt,
+      ip: lead.ip,
+      userAgent: lead.userAgent,
+      referrer: lead.referrer,
+    };
 
     await Promise.all([
       sendEmailSafe({

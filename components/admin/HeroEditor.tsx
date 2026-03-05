@@ -318,7 +318,7 @@ export default function HeroEditor({
     if (!slide.image) return null;
     // Public path used as-is (fallback slides)
     if (slide.image.startsWith("/")) return slide.image;
-    // R2 key — build permanent public URL
+    // R2 key - build permanent public URL
     return getPublicUrl(slide.image);
   }
 

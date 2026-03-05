@@ -90,7 +90,7 @@ export default function Turnstile({
       script.onload = render;
       document.head.appendChild(script);
     } else {
-      // Script tag exists but turnstile may not be ready yet — poll briefly
+      // Script tag exists but turnstile may not be ready yet - poll briefly
       const interval = setInterval(() => {
         if (window.turnstile) {
           clearInterval(interval);

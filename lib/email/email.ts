@@ -28,7 +28,7 @@ export type EmailPayload = {
 };
 
 // ---------------------------------------------------------------------------
-// sendEmail — throws on Resend error
+// sendEmail - throws on Resend error
 // ---------------------------------------------------------------------------
 
 export async function sendEmail(payload: EmailPayload): Promise<void> {
@@ -46,7 +46,7 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// sendEmailSafe — never throws; logs and returns false on failure.
+// sendEmailSafe - never throws; logs and returns false on failure.
 // Use for fire-and-forget cases where email failure must not break the flow.
 // ---------------------------------------------------------------------------
 

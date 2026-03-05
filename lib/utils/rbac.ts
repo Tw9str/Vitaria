@@ -1,6 +1,6 @@
 import type { Role } from "@prisma/client";
 
-/** Role hierarchy — higher index = more permissions. */
+/** Role hierarchy - higher index = more permissions. */
 const ROLE_RANK: Record<Role, number> = {
   editor: 0,
   admin: 1,
@@ -32,7 +32,7 @@ export const requireOwner = (role: Role | undefined) =>
 
 /**
  * Throws if the user is not authenticated at all.
- * Allows editor, admin, and owner — use for actions available to all staff.
+ * Allows editor, admin, and owner - use for actions available to all staff.
  */
 export function requireAuth(role: Role | undefined): void {
   if (!role) throw new Error("FORBIDDEN");

@@ -88,6 +88,7 @@ function LoginForm() {
               onClick={() => {
                 setSent(false);
                 setError(null);
+                setEmail("");
               }}
               className="mt-5 text-sm text-subtle underline-offset-2 hover:underline"
             >
