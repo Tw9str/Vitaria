@@ -16,6 +16,10 @@ WEBSITE-AR.md
 GUIDE.md
 GUIDE-AR.md
 OFFER-Khalid.md
+
+# seed
+/prisma/seed.ts
+
 # testing
 /coverage
 

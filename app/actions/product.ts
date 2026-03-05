@@ -82,24 +82,7 @@ export async function upsertProductAction(
   const session = await auth();
   requireAuth(session?.role);
 
-  const isAdmin = session?.role === "admin";
   const rawId = getString(formData, "id") || undefined;
-
-  // Editors cannot change the published state.
-  // For new products they always create as draft; for existing products the
-  // current published value is preserved so an admin's live product stays live.
-  let publishedValue: boolean;
-  if (isAdmin) {
-    publishedValue = formData.get("published") === "on";
-  } else if (rawId) {
-    const existing = await prisma.product.findUnique({
-      where: { id: rawId },
-      select: { published: true },
-    });
-    publishedValue = existing?.published ?? false;
-  } else {
-    publishedValue = false;
-  }
 
   const raw = {
     id: rawId,
@@ -128,8 +111,6 @@ export async function upsertProductAction(
         return [];
       }
     })(),
-
-    published: publishedValue,
   };
 
   const parsed = productSchema.safeParse(raw);
@@ -189,13 +170,15 @@ export async function upsertProductAction(
   }
 
   const userId = session?.user?.id ?? null;
+  // published is never set by the editor — new products start as draft,
+  // existing products preserve their current published state.
   const saved = id
     ? await prisma.product.update({
         where: { id },
         data: { ...data, slug: newSlug },
       })
     : await prisma.product.create({
-        data: { ...data, slug: newSlug, createdById: userId },
+        data: { ...data, slug: newSlug, published: false, createdById: userId },
       });
 
   const actor = {

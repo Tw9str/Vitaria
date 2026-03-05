@@ -71,9 +71,7 @@ function useFieldValues(
     return product?.specs ?? [];
   });
 
-  const [published, setPublished] = useState(
-    v ? v["published"] === "on" : (product?.published ?? false),
-  );
+  const [published] = useState(product?.published ?? false);
 
   // Sync all fields when a new actionState with values arrives.
   const prevValuesRef = useRef(v);
@@ -92,7 +90,6 @@ function useFieldValues(
     } catch {
       setSpecs([]);
     }
-    setPublished(v["published"] === "on");
   }
 
   return {
@@ -107,7 +104,6 @@ function useFieldValues(
     specs,
     setSpecs,
     published,
-    setPublished,
   };
 }
 
@@ -580,23 +576,29 @@ export default function ProductEditorForm({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* Publish status toggle */}
-            <button
-              type="button"
-              onClick={() => fields.setPublished(!fields.published)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-all cursor-pointer ${
-                fields.published
-                  ? "bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400 hover:bg-green-500/20"
-                  : "bg-amber-400/10 border-amber-400/30 text-amber-600 dark:text-amber-400 hover:bg-amber-400/20"
-              }`}
+            {/* Publish status badge (read-only — toggle from product card) */}
+            <span
+              className="flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-subtle border border-border bg-transparent select-none"
+              title="Manage visibility from the product card"
             >
+              <svg
+                className="h-3 w-3 shrink-0 opacity-60"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  fields.published ? "bg-green-500" : "bg-amber-400"
-                }`}
-              />
-              {fields.published ? "Published" : "Draft"}
-            </button>
+                className={
+                  fields.published ? "text-green-500/70" : "text-amber-400/70"
+                }
+              >
+                {fields.published ? "Published" : "Draft"}
+              </span>
+            </span>
 
             {/* Save */}
             <button
@@ -622,13 +624,6 @@ export default function ProductEditorForm({
           type="hidden"
           name="gallery"
           value={galleryKeys.join("\n")}
-          readOnly
-        />
-        {/* Hidden published value - controlled by the toggle in the action bar */}
-        <input
-          type="hidden"
-          name="published"
-          value={fields.published ? "on" : ""}
           readOnly
         />
 
