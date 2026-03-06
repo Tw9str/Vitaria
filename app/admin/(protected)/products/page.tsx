@@ -3,6 +3,7 @@ import Link from "next/link";
 import EditButton from "@/components/admin/EditButton";
 
 export const metadata: Metadata = { title: "Products" };
+
 import Image from "next/image";
 import { getAllProducts } from "@/lib/db/products";
 import { getPublicUrl } from "@/lib/storage/url";
